@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Tag } from "lucide-react";
+import { Plus, Edit2, Trash2, Tag, ArrowLeft } from "lucide-react";
 
 const CategoriesPanel = ({
   categories,
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
+  onSetActiveTab,
 }) => {
   const [showForm, setShowForm] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
@@ -55,7 +56,17 @@ const CategoriesPanel = ({
   const expenseCategories = categories.filter((c) => c.type === "Expense");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      
+      {onSetActiveTab && (
+        <button 
+          onClick={() => onSetActiveTab("settings")}
+          className="flex items-center gap-1.5 text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline cursor-pointer transition-all active:scale-95 w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Settings
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

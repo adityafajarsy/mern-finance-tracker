@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { User, Settings, Lock, Mail, DollarSign, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { User, Settings, Lock, Mail, DollarSign, Eye, EyeOff, CheckCircle, Tag } from "lucide-react";
 
-const SettingsPanel = () => {
+const SettingsPanel = ({ onSetActiveTab }) => {
   const { user, updateProfile } = useAuth();
 
   // Settings states
@@ -155,6 +155,30 @@ const SettingsPanel = () => {
             </button>
           </div>
         </form>
+
+        {/* Section: App Settings */}
+        {onSetActiveTab && (
+          <div className="space-y-5 pt-6 mt-6 border-t border-zinc-100 dark:border-zinc-800 animate-fade-in">
+            <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-2 font-display">
+              <Settings className="w-4.5 h-4.5 text-violet-600 dark:text-violet-400" />
+              App Preferences
+            </h3>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => onSetActiveTab("categories")}
+                className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-205 dark:border-zinc-800 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs transition-all w-full cursor-pointer group"
+              >
+                <span className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform" />
+                  Manage Category Tags
+                </span>
+                <span className="text-zinc-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

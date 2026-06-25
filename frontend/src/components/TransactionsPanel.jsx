@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Calendar, Filter, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, Calendar, Filter, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, X, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const TransactionsPanel = ({
@@ -7,6 +7,7 @@ const TransactionsPanel = ({
   categories,
   onOpenTransactionModal,
   onDeleteTransaction,
+  onSetActiveTab,
 }) => {
   const { authFetch, user, handleResponse } = useAuth();
 
@@ -115,8 +116,17 @@ const TransactionsPanel = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       
+      {onSetActiveTab && (
+        <button 
+          onClick={() => onSetActiveTab("accounts")}
+          className="flex items-center gap-1.5 text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline cursor-pointer transition-all active:scale-95 w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Accounts
+        </button>
+      )}
+
       {/* Header Actions */}
       <div className="flex justify-between items-center">
         <div>

@@ -11,7 +11,8 @@ import {
   Trash2, 
   AlertCircle, 
   Calendar,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from "lucide-react";
 
 const ReportsPanel = ({ 
@@ -22,7 +23,8 @@ const ReportsPanel = ({
   categories, 
   summary, 
   onOpenTransactionModal, 
-  onDeleteTransaction 
+  onDeleteTransaction,
+  onSetActiveTab
 }) => {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -155,7 +157,16 @@ const ReportsPanel = ({
           </button>
         </div>
 
-        <div className="flex gap-2.5 w-full sm:w-auto justify-center">
+        <div className="flex gap-2.5 w-full sm:w-auto justify-center flex-wrap">
+          <button
+            onClick={() => onSetActiveTab("analytics")}
+            className="flex items-center gap-1.5 px-4.5 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"
+            title="View Charts"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Charts
+          </button>
+          
           <button
             onClick={fetchMonthlyReport}
             className="flex items-center gap-1.5 px-4.5 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"

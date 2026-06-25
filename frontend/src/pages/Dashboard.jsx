@@ -297,6 +297,7 @@ const Dashboard = () => {
             categories={categories}
             onOpenTransactionModal={handleOpenTransactionModal}
             onDeleteTransaction={handleDeleteTransaction}
+            onSetActiveTab={setActiveTab}
           />
         );
       case "accounts":
@@ -308,6 +309,7 @@ const Dashboard = () => {
             onUpdateAccount={handleUpdateAccount}
             onDeleteAccount={handleDeleteAccount}
             onOpenTransactionModal={handleOpenTransactionModal}
+            onSetActiveTab={setActiveTab}
           />
         );
       case "reports":
@@ -321,6 +323,7 @@ const Dashboard = () => {
             summary={summary}
             onOpenTransactionModal={handleOpenTransactionModal}
             onDeleteTransaction={handleDeleteTransaction}
+            onSetActiveTab={setActiveTab}
           />
         );
       case "categories":
@@ -330,12 +333,13 @@ const Dashboard = () => {
             onCreateCategory={handleCreateCategory}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
+            onSetActiveTab={setActiveTab}
           />
         );
       case "analytics":
-        return <AnalyticsPanel user={user} />;
+        return <AnalyticsPanel user={user} onSetActiveTab={setActiveTab} />;
       case "settings":
-        return <SettingsPanel />;
+        return <SettingsPanel onSetActiveTab={setActiveTab} />;
       default:
         return <div>Sub-panel not found.</div>;
     }
@@ -343,11 +347,8 @@ const Dashboard = () => {
 
   const navItems = [
     { id: "overview", label: "Home", icon: <Home className="w-4.5 h-4.5" /> },
-    { id: "transactions", label: "Ledger", icon: <FileText className="w-4.5 h-4.5" /> },
     { id: "accounts", label: "Accounts", icon: <Landmark className="w-4.5 h-4.5" /> },
-    { id: "analytics", label: "Charts", icon: <BarChart3 className="w-4.5 h-4.5" /> },
     { id: "reports", label: "Reports", icon: <BookOpen className="w-4.5 h-4.5" /> },
-    { id: "categories", label: "Tags", icon: <Tag className="w-4.5 h-4.5" /> },
     { id: "settings", label: "Settings", icon: <Settings className="w-4.5 h-4.5" /> },
   ];
 
@@ -475,35 +476,66 @@ const Dashboard = () => {
       </main>
 
       {/* Mobile Bottom Tab Navigation Bar (Sticky on mobile only) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-300 md:hidden">
-        <div className="max-w-md mx-auto px-2 h-16 flex items-center justify-around">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${isActive
-                    ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
-                    : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
-                  }`}
-              >
-                {item.icon}
-                <span className="text-[9px] tracking-wide font-medium">{item.label}</span>
-              </button>
-            );
-          })}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-300 md:hidden pb-safe">
+        <div className="max-w-md mx-auto px-2 h-16 flex items-center justify-around relative">
+          {/* Home */}
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "overview"
+                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
+                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
+              }`}
+          >
+            <Home className="w-4.5 h-4.5" />
+            <span className="text-[9px] tracking-wide font-medium">Home</span>
+          </button>
+
+          {/* Accounts */}
+          <button
+            onClick={() => setActiveTab("accounts")}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "accounts"
+                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
+                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
+              }`}
+          >
+            <Landmark className="w-4.5 h-4.5" />
+            <span className="text-[9px] tracking-wide font-medium">Accounts</span>
+          </button>
+
+          {/* Center Plus Button (float slightly above with thick border) */}
+          <button
+            onClick={() => handleOpenTransactionModal("Expense")}
+            className="w-12 h-12 bg-violet-600 dark:bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-violet-500/35 transform active:scale-95 transition-all -mt-6 border-4 border-white dark:border-zinc-900 z-50 hover:bg-violet-750 cursor-pointer"
+            title="Add Transaction"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+
+          {/* Reports */}
+          <button
+            onClick={() => setActiveTab("reports")}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "reports"
+                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
+                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
+              }`}
+          >
+            <BookOpen className="w-4.5 h-4.5" />
+            <span className="text-[9px] tracking-wide font-medium">Reports</span>
+          </button>
+
+          {/* Settings */}
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "settings"
+                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
+                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
+              }`}
+          >
+            <Settings className="w-4.5 h-4.5" />
+            <span className="text-[9px] tracking-wide font-medium">Settings</span>
+          </button>
         </div>
       </nav>
-
-      {/* Floating Action Button (Only Mobile, positioned beautifully above bottom nav) */}
-      <button
-        onClick={() => handleOpenTransactionModal("Expense")}
-        className="md:hidden fixed right-4 bottom-20 z-40 w-12 h-12 bg-violet-600 hover:bg-violet-700 text-white rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30 cursor-pointer transform hover:scale-105 transition-all"
-        title="Add Entry"
-      >
-        <Plus className="w-5 h-5" />
-      </button>
 
       {/* Transaction Modal Overlay (Income / Expense / Transfer overlay drawer) */}
       {showTxModal && (

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, ArrowLeftRight, Landmark, CreditCard, Wallet, HelpCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, ArrowLeftRight, Landmark, CreditCard, Wallet, HelpCircle, FileText } from "lucide-react";
 
 const AccountsPanel = ({
   accounts,
   user,
   onCreateAccount,
+  onSetActiveTab,
   onUpdateAccount,
   onDeleteAccount,
   onOpenTransactionModal,
@@ -95,7 +96,14 @@ const AccountsPanel = ({
             Total overall wealth: <span className="font-semibold text-zinc-700 dark:text-zinc-300 font-mono">{formatCurrency(totalSum)}</span>
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => onSetActiveTab("transactions")}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"
+          >
+            <FileText className="w-4 h-4" />
+            Ledger
+          </button>
           <button
             onClick={() => onOpenTransactionModal("Transfer")}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { TrendingUp, PieChart, Calendar, AlertCircle } from "lucide-react";
+import { TrendingUp, PieChart, Calendar, AlertCircle, ArrowLeft } from "lucide-react";
 
-const AnalyticsPanel = ({ user }) => {
+const AnalyticsPanel = ({ user, onSetActiveTab }) => {
   const { authFetch } = useAuth();
   
   const [trends, setTrends] = useState([]);
@@ -180,8 +180,17 @@ const AnalyticsPanel = ({ user }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       
+      {onSetActiveTab && (
+        <button 
+          onClick={() => onSetActiveTab("reports")}
+          className="flex items-center gap-1.5 text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline cursor-pointer transition-all active:scale-95 w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Reports
+        </button>
+      )}
+
       {/* Header and Toggle */}
       <div className="flex justify-between items-center">
         <div>
