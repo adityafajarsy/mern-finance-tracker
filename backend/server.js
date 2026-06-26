@@ -1,5 +1,9 @@
+import dns from "dns";
 import express from "express";
 import dotenv from "dotenv";
+
+// Force Node.js to use Google DNS (bypass ISP DNS that blocks MongoDB SRV)
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
