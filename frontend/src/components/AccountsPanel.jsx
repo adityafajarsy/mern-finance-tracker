@@ -86,11 +86,11 @@ const AccountsPanel = ({
   const totalSum = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
   return (
-    <div className="space-y-8 animate-fade-in font-sans max-w-3xl">
+    <div className="space-y-8 animate-fade-in font-sans max-w-3xl pb-4">
       
       {/* 1. DOMINANT TOTAL WEALTH STATEMENT */}
       <section className="space-y-2 border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-6">
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
               Total Wealth
@@ -103,10 +103,10 @@ const AccountsPanel = ({
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={onOpenTransfer}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] text-[#09261E] dark:text-white rounded-lg text-xs font-bold hover:bg-[#F4FAF6] cursor-pointer transition-all"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] text-[#09261E] dark:text-white rounded-xl text-xs font-bold hover:bg-[#F4FAF6] cursor-pointer transition-all shadow-2xs"
             >
               <ArrowLeftRight className="w-3.5 h-3.5 text-[#00A86B]" />
               <span>Transfer</span>
@@ -114,7 +114,7 @@ const AccountsPanel = ({
 
             <button
               onClick={handleOpenCreate}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer transition-all"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-xl text-xs font-bold shadow-md shadow-[#00A86B]/20 cursor-pointer transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Account</span>

@@ -487,7 +487,7 @@ const Dashboard = () => {
 
       {/* Main Editorial Content Container */}
       <main className="flex-1 md:pl-56 2xl:pl-64 w-full min-w-0 pb-0 md:pb-24">
-        <div className="max-w-4xl 2xl:max-w-6xl mx-auto w-full px-4 sm:px-6 py-0 md:p-10 2xl:p-12">
+        <div className="max-w-4xl 2xl:max-w-6xl mx-auto w-full px-4 sm:px-6 py-0 md:p-10 2xl:p-12 pb-28 md:pb-10">
           {renderActivePanel()}
         </div>
       </main>

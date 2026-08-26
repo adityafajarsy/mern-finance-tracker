@@ -7,13 +7,15 @@ const connectDB = async () => {
     return mongoose.connection;
   }
 
-  if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI environment variable is not defined.");
+  const mongoUri = process.env.MONGO_URI;
+  if (!mongoUri) {
+    console.warn("⚠️ MONGO_URI is not defined. Please check your .env file.");
+    return null;
   }
 
   if (!cachedPromise) {
     cachedPromise = mongoose
-      .connect(process.env.MONGO_URI, {
+      .connect(mongoUri, {
         serverSelectionTimeoutMS: 5000,
       })
       .then((m) => {
@@ -23,7 +25,7 @@ const connectDB = async () => {
       .catch((err) => {
         cachedPromise = null;
         console.error(`MongoDB Connection Error: ${err.message}`);
-        throw err;
+        return null;
       });
   }
 

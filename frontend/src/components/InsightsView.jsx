@@ -101,7 +101,7 @@ const InsightsView = ({ authFetch }) => {
   );
 
   return (
-    <div className="space-y-12 animate-fade-in pb-12 font-sans max-w-3xl">
+    <div className="space-y-12 animate-fade-in pb-4 font-sans max-w-3xl">
       
       {/* Header & Month Navigator */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-4">

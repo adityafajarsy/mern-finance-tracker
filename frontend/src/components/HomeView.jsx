@@ -126,18 +126,18 @@ const HomeView = ({
           </div>
 
           {/* Balance Display */}
-          <div className="relative z-10 space-y-1.5 pt-5 sm:pt-6 pb-1">
+          <div className="relative z-10 space-y-1 pt-4 sm:pt-6 pb-1">
             <p className="text-xs font-semibold text-[#1C5F4D] dark:text-[#88C8AC] tracking-wide">
               Available balance
             </p>
 
-            <h1 className="text-[48px] sm:text-5xl font-black font-display tracking-tight text-[#08241B] dark:text-white tabular-nums leading-none">
+            <h1 className="text-4xl sm:text-5xl font-black font-display tracking-tight text-[#08241B] dark:text-white tabular-nums leading-tight whitespace-nowrap overflow-x-auto no-scrollbar">
               {formatCurrency(totalWealth)}
             </h1>
           </div>
 
           {/* Horizontal Scroll Quick Action Shortcut Buttons (Spacious, Swipeable Rounded Cards) */}
-          <div className="relative z-10 flex items-center gap-3 overflow-x-auto no-scrollbar pt-3 pb-1 -mx-2 px-2 select-none">
+          <div className="relative z-10 flex items-center gap-3.5 sm:gap-4 overflow-x-auto no-scrollbar pt-3 pb-1 -mx-2 px-2 select-none">
             <button
               onClick={onOpenCapture}
               className="flex flex-col items-center justify-center gap-2 w-20 h-20 shrink-0 rounded-2xl bg-[#09261E] dark:bg-[#0E362A] text-white shadow-lg shadow-[#09261E]/15 active:scale-95 transition-all cursor-pointer group"
@@ -181,7 +181,7 @@ const HomeView = ({
         </section>
 
         {/* Lower Elevated Activity Sheet (White/Dark Container Extends Seamlessly to Bottom) */}
-        <section className="bg-white dark:bg-[#09261E] rounded-t-[32px] -mx-4 px-5 pt-3 pb-32 shadow-2xl border-t border-[#D1EADE]/80 dark:border-[#14382C] min-h-[68vh] space-y-4">
+        <section className="bg-white dark:bg-[#09261E] rounded-t-[32px] -mx-4 px-5 pt-3 pb-24 shadow-2xl border-t border-[#D1EADE]/80 dark:border-[#14382C] min-h-[68vh] space-y-4">
           
           {/* Subtle Pull Indicator Bar */}
           <div className="w-10 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-2" />

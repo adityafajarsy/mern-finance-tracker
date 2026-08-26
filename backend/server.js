@@ -6,6 +6,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 
+// ES Modules __dirname resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env automatically from root or backend folder
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
 // Route imports
 import authRoutes from "./routes/auth.js";
 import accountRoutes from "./routes/accounts.js";
@@ -14,10 +23,8 @@ import transactionRoutes from "./routes/transactions.js";
 import statsRoutes from "./routes/stats.js";
 import captureRoutes from "./routes/capture.js";
 
-dotenv.config();
-
-// Bypass ISP DNS for MongoDB SRV in local dev only
-if (process.env.NODE_ENV !== "production") {
+// Bypass ISP DNS for MongoDB SRV when running on local machine (not on Vercel)
+if (!process.env.VERCEL) {
   try {
     dns.setServers(["8.8.8.8", "8.8.4.4"]);
   } catch (e) {
@@ -61,10 +68,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// ES Modules __dirname resolution
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
@@ -76,11 +79,11 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Only listen locally (Vercel Serverless manages execution via export default app)
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
+// Listen when running as a standalone node process (not inside Vercel serverless sandbox)
+if (!process.env.VERCEL) {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(
-      `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
+      `🚀 SALDO Server running locally on http://127.0.0.1:${PORT}`,
     );
   });
 }

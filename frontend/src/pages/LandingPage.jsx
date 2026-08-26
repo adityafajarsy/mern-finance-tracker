@@ -17,7 +17,9 @@ import {
   CheckCircle2,
   Calendar,
   Flame,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Menu,
+  X
 } from "lucide-react";
 import OrganicFlowLine from "../components/ui/OrganicFlowLine";
 import HeroProductVisual from "../components/HeroProductVisual";
@@ -134,11 +136,10 @@ const LandingPage = () => {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-1.5 rounded-lg text-[#09261E] dark:text-white hover:bg-black/5 transition-colors cursor-pointer"
+              className="md:hidden p-2 rounded-xl text-[#09261E] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer flex items-center justify-center"
+              aria-label="Toggle Navigation Menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" x2="20" y1="12" data-name="line-1" /><line x1="4" x2="20" y1="6" data-name="line-2" /><line x1="4" x2="20" y1="18" data-name="line-3" />
-              </svg>
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -146,12 +147,12 @@ const LandingPage = () => {
 
       {/* Mobile Drawer Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-[#09261E]/80 backdrop-blur-md md:hidden flex flex-col justify-center items-center gap-6 p-6 animate-fade-in text-center">
+        <div className="fixed inset-0 z-40 bg-[#09261E]/85 backdrop-blur-xl md:hidden flex flex-col justify-center items-center gap-6 p-6 animate-fade-in text-center">
           <button 
             onClick={() => setMobileOpen(false)}
-            className="absolute top-6 right-6 p-2 rounded-full bg-white/20 text-white cursor-pointer"
+            className="absolute top-6 right-6 p-2.5 rounded-full bg-white/20 text-white cursor-pointer hover:bg-white/30 transition-colors"
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
           <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">How It Works</a>
           <a href="#insights" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Insights</a>
@@ -159,10 +160,10 @@ const LandingPage = () => {
           <a href="#accounts" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Accounts</a>
           <a href="#why-saldo" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Why SALDO</a>
           <div className="flex flex-col gap-3 w-full max-w-xs mt-4">
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="w-full py-3 bg-white/10 text-white rounded-full font-bold text-sm">
+            <Link to="/login" onClick={() => setMobileOpen(false)} className="w-full py-3.5 bg-white/10 text-white rounded-full font-bold text-sm">
               Sign In
             </Link>
-            <Link to="/register" onClick={() => setMobileOpen(false)} className="w-full py-3 bg-[#00A86B] text-white rounded-full font-black text-sm shadow-lg shadow-[#00A86B]/30">
+            <Link to="/register" onClick={() => setMobileOpen(false)} className="w-full py-3.5 bg-[#00A86B] text-white rounded-full font-black text-sm shadow-lg shadow-[#00A86B]/30">
               Get Started Free
             </Link>
           </div>
@@ -182,7 +183,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 lg:gap-8 items-center relative z-10">
           
           {/* LEFT: Product Message */}
-          <div className="md:col-span-7 space-y-5 md:space-y-6 2xl:space-y-8 text-left">
+          <div className="md:col-span-7 space-y-5 md:space-y-6 2xl:space-y-8 text-center md:text-left flex flex-col items-center md:items-start">
             <div className="inline-flex items-center gap-2 px-3.5 2xl:px-4 py-1.5 2xl:py-2 rounded-full bg-white/90 border border-[#D1EADE] text-[#0E362A] text-xs 2xl:text-sm font-bold shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-[#00A86B]" />
               <span>An intelligent personal finance companion</span>
@@ -193,27 +194,27 @@ const LandingPage = () => {
               <span className="text-[#00A86B]">understood.</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-base lg:text-lg 2xl:text-xl text-[#1C5F4D] max-w-lg 2xl:max-w-2xl font-medium leading-relaxed">
+            <p className="text-base sm:text-lg md:text-base lg:text-lg 2xl:text-xl text-[#1C5F4D] max-w-lg 2xl:max-w-2xl font-medium leading-relaxed mx-auto md:mx-0">
               Track spending, understand your habits, and see what's ahead without filling out endless forms.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3.5 2xl:gap-5 pt-2">
+            <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-3 sm:gap-3.5 2xl:gap-5 pt-2 max-w-sm sm:max-w-none mx-auto md:mx-0">
               <Link
                 to="/register"
-                className="px-6 sm:px-7 2xl:px-9 py-3 sm:py-3.5 2xl:py-4 bg-[#00A86B] hover:bg-[#00935D] text-white font-black text-sm 2xl:text-base rounded-full shadow-xl shadow-[#00A86B]/25 transition-all flex items-center gap-2 cursor-pointer active:scale-98"
+                className="w-full sm:w-auto px-7 2xl:px-9 py-3.5 2xl:py-4 bg-[#00A86B] hover:bg-[#00935D] text-white font-black text-sm 2xl:text-base rounded-full shadow-xl shadow-[#00A86B]/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4 2xl:w-5 2xl:h-5" />
               </Link>
               <a
                 href="#how-it-works"
-                className="px-5 sm:px-6 2xl:px-8 py-3 sm:py-3.5 2xl:py-4 bg-white hover:bg-[#F4FAF6] border border-[#D1EADE] text-[#09261E] font-bold text-sm 2xl:text-base rounded-full transition-all flex items-center justify-center shadow-2xs"
+                className="w-full sm:w-auto px-6 2xl:px-8 py-3.5 2xl:py-4 bg-white hover:bg-[#F4FAF6] border border-[#D1EADE] text-[#09261E] font-bold text-sm 2xl:text-base rounded-full transition-all flex items-center justify-center shadow-2xs"
               >
                 See How It Works
               </a>
             </div>
 
-            <div className="pt-3 flex items-center gap-2 text-xs 2xl:text-sm font-serif italic text-[#1C5F4D]">
+            <div className="pt-2 flex items-center justify-center md:justify-start gap-2 text-xs 2xl:text-sm font-serif italic text-[#1C5F4D]">
               <span>Your money is always moving.</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#00A86B] stroke-current stroke-2">
                 <path d="M 4 8 Q 14 6, 18 16" strokeLinecap="round" />
@@ -299,26 +300,26 @@ const LandingPage = () => {
           <div className="md:col-span-7 space-y-4">
             
             {/* Input Simulation Box */}
-            <div className="bg-white rounded-2xl p-5 border border-[#D1EADE] shadow-xs space-y-2">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#D1EADE] shadow-xs space-y-1.5">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D]">
                 Natural Language Input
               </span>
-              <div className="text-base sm:text-lg font-bold font-display text-[#09261E] flex items-center justify-between">
-                <span>"{demoText}"</span>
-                <span className="w-7 h-7 rounded-lg bg-[#00A86B] text-white flex items-center justify-center shrink-0 ml-2">
-                  <ArrowUpRight className="w-4 h-4" />
+              <div className="text-sm sm:text-base md:text-lg font-bold font-display text-[#09261E] flex items-center justify-between gap-2">
+                <span className="truncate">"{demoText}"</span>
+                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#00A86B] text-white flex items-center justify-center shrink-0">
+                  <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </span>
               </div>
             </div>
 
             {/* Downward connecting indicator */}
             <div className="flex justify-center -my-1">
-              <div className="w-0.5 h-6 bg-[#00A86B]/40" />
+              <div className="w-0.5 h-5 bg-[#00A86B]/40" />
             </div>
 
             {/* Interpreted Result Visual */}
-            <div className="bg-white rounded-2xl p-6 border border-[#D1EADE] shadow-md space-y-4">
-              <div className="flex justify-between items-center border-b border-[#E8F5EE] pb-3">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#D1EADE] shadow-md space-y-3.5">
+              <div className="flex justify-between items-center border-b border-[#E8F5EE] pb-2.5">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#00A86B] flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5" />
                   SALDO Understood & Categorized
@@ -328,28 +329,28 @@ const LandingPage = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between items-baseline">
-                <div>
-                  <h3 className="text-xl font-bold font-display text-[#09261E]">{demoDraft.title}</h3>
-                  <p className="text-xs text-[#1C5F4D] font-medium mt-0.5">Resolved automatically to default account</p>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1 sm:gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold font-display text-[#09261E]">{demoDraft.title}</h3>
+                  <p className="text-[11px] sm:text-xs text-[#1C5F4D] font-medium mt-0.5">Resolved automatically to default account</p>
                 </div>
-                <span className="text-2xl font-black font-mono text-[#09261E] tabular-nums">
+                <span className="text-xl sm:text-2xl font-black font-mono text-[#09261E] tabular-nums whitespace-nowrap shrink-0">
                   {demoDraft.amount}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-[#E8F5EE]">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 bg-[#F4FAF6] border border-[#D1EADE] rounded-lg text-xs font-semibold text-[#09261E]">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-[#E8F5EE]">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#F4FAF6] border border-[#D1EADE] rounded-lg text-[11px] font-semibold text-[#09261E] whitespace-nowrap">
                     🏦 {demoDraft.account}
                   </span>
-                  <span className="px-2.5 py-1 bg-[#E8F5EE] border border-[#C2E2D3] rounded-lg text-xs font-semibold text-[#00A86B]">
+                  <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#E8F5EE] border border-[#C2E2D3] rounded-lg text-[11px] font-semibold text-[#00A86B] whitespace-nowrap">
                     🏷️ {demoDraft.category}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A86B]">
-                  <CheckCircle2 className="w-4 h-4" />
+                <div className="flex items-center gap-1 text-[11px] font-bold text-[#00A86B] whitespace-nowrap">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Saved with exact second</span>
                 </div>
               </div>
@@ -379,7 +380,7 @@ const LandingPage = () => {
         </div>
 
         {/* Rising Half-Peek iPad Showcase (Top-half reveals beautifully, bottom-half bleeds into next section) */}
-        <div className="relative max-w-4xl 2xl:max-w-5xl mx-auto flex justify-center -mb-28 sm:-mb-36 md:-mb-48 2xl:-mb-60 select-none pointer-events-none">
+        <div className="relative max-w-4xl 2xl:max-w-5xl mx-auto flex justify-center -mb-10 sm:-mb-16 md:-mb-24 2xl:-mb-32 select-none pointer-events-none">
           {/* Soft Ambient Glow Behind Device Upper Bezel */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#00A86B]/15 blur-3xl rounded-full -z-10" />
 
