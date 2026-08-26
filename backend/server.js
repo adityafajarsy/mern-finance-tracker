@@ -36,8 +36,12 @@ app.use(express.json());
 
 // Ensure DB is connected for serverless invocations
 app.use(async (req, res, next) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // API Routes
@@ -75,7 +79,9 @@ const PORT = process.env.PORT || 5000;
 // Only listen locally (Vercel Serverless manages execution via export default app)
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
+    console.log(
+      `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
+    );
   });
 }
 
