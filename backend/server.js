@@ -1,9 +1,6 @@
 import dns from "dns";
 import express from "express";
 import dotenv from "dotenv";
-
-// Force Node.js to use Google DNS (bypass ISP DNS that blocks MongoDB SRV)
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -19,7 +16,16 @@ import captureRoutes from "./routes/capture.js";
 
 dotenv.config();
 
-// Connect to MongoDB
+// Bypass ISP DNS for MongoDB SRV in local dev only
+if (process.env.NODE_ENV !== "production") {
+  try {
+    dns.setServers(["8.8.8.8", "8.8.4.4"]);
+  } catch (e) {
+    // Ignore in restricted environments
+  }
+}
+
+// Initial connection
 connectDB();
 
 const app = express();
@@ -27,6 +33,12 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Ensure DB is connected for serverless invocations
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // API Routes
 app.use("/api/users", authRoutes);
@@ -36,23 +48,18 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/capture", captureRoutes);
 
+// Root / Health check route
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "SALDO Finance Tracker API is running smoothly",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ES Modules __dirname resolution
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Production Static Assets Handler
-if (process.env.NODE_ENV === "production") {
-  const frontendBuildPath = path.join(__dirname, "../frontend/dist");
-  app.use(express.static(frontendBuildPath));
-
-  app.get(/.*/, (req, res) => {
-    res.sendFile(path.resolve(frontendBuildPath, "index.html"));
-  });
-} else {
-  app.get("/", (req, res) => {
-    res.send("Personal Finance Tracker API is running...");
-  });
-}
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {
@@ -65,6 +72,11 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
-});
+// Only listen locally (Vercel Serverless manages execution via export default app)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
+  });
+}
+
+export default app;
