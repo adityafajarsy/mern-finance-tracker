@@ -108,10 +108,10 @@ const DashboardOverview = ({ summary, user, onSetActiveTab, onOpenTransactionMod
       </div>
 
       {/* Net Monthly Savings Card with Bright Green Gradient Icon */}
-      <div className="p-5 rounded-2xl border border-emerald-500/15 dark:border-emerald-500/20 bg-white dark:bg-zinc-900 bg-linear-to-r from-emerald-500/2 to-teal-500/2 flex items-center justify-between transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md">
+      <div className="p-5 rounded-2xl border border-emerald-500/15 dark:border-emerald-500/20 bg-white dark:bg-zinc-900 bg-gradient-to-r from-emerald-500/[0.04] to-teal-500/[0.02] flex items-center justify-between transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md">
         
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-emerald-400 to-teal-500 dark:from-emerald-500 dark:to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/15 dark:shadow-none transition-transform duration-300 group-hover:scale-105">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 dark:from-emerald-500 dark:to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/15 dark:shadow-none transition-transform duration-300 group-hover:scale-105">
             {savingsShift >= 0 ? (
               <TrendingUp className="w-5 h-5" />
             ) : (

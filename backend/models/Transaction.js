@@ -21,6 +21,10 @@ const transactionSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    capturedAt: {
+      type: Date,
+      default: Date.now,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -42,6 +46,16 @@ const transactionSchema = new mongoose.Schema(
         return this.type === "Transfer";
       },
     },
+    items: [
+      {
+        description: { type: String, trim: true },
+        amount: { type: Number, min: 0 },
+        category: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Category",
+        },
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

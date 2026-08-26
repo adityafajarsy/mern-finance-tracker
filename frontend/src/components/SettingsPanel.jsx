@@ -1,185 +1,231 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { User, Settings, Lock, Mail, DollarSign, Eye, EyeOff, CheckCircle, Tag } from "lucide-react";
+import { 
+  User, 
+  Mail, 
+  Moon, 
+  Sun, 
+  DollarSign, 
+  Tag, 
+  Check, 
+  ShieldCheck,
+  Landmark,
+  LogOut
+} from "lucide-react";
 
-const SettingsPanel = ({ onSetActiveTab }) => {
-  const { user, updateProfile } = useAuth();
+const SettingsPanel = ({ accounts = [], onOpenCategoriesModal }) => {
+  const { user, updateProfile, logout } = useAuth();
 
-  // Settings states
   const [username, setUsername] = useState(user?.username || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [password, setPassword] = useState("");
   const [currency, setCurrency] = useState(user?.currency || "IDR");
-  
-  // Status feedback states
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [defaultAccount, setDefaultAccount] = useState(user?.defaultAccount?._id || user?.defaultAccount || "");
+  const [darkMode, setDarkMode] = useState(user?.darkMode || false);
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e) => {
+  const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSaveSettings = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
-    setError("");
+    setSaving(true);
+    setSuccessMsg("");
+    setErrorMsg("");
 
     try {
       const payload = {
         username,
         email,
-        currency: "IDR",
+        currency,
+        darkMode,
+        defaultAccount: defaultAccount || null,
       };
-
       if (password) {
         payload.password = password;
       }
 
       await updateProfile(payload);
+      setSuccessMsg("Settings saved successfully.");
       setPassword("");
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err) {
-      setError(err.message || "Failed to update profile details");
+      setErrorMsg(err.message || "Failed to update profile settings");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="max-w-2xl space-y-8 animate-fade-in pb-12 font-sans">
+      
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight font-display">Settings</h2>
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">Manage your financial tracker settings & profile</p>
+      <div className="border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-4">
+        <h2 className="text-2xl sm:text-3xl font-black text-[#09261E] dark:text-white tracking-tight font-display">
+          Settings
+        </h2>
+        <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] mt-0.5">
+          Configure preferences, default automation, and personal profile
+        </p>
       </div>
 
-      {/* Settings Forms */}
-      <div className="bg-white dark:bg-zinc-900 border border-[#EEF2F7] dark:border-zinc-800/80 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300">
+      {successMsg && (
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-bold flex items-center gap-2">
+          <Check className="w-4 h-4" />
+          {successMsg}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 rounded-lg text-xs font-bold">
+          {errorMsg}
+        </div>
+      )}
+
+      <form onSubmit={handleSaveSettings} className="space-y-8">
         
-        {/* Success Feedback Alert */}
-        {success && (
-          <div className="mb-6 flex items-start gap-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 p-4 rounded-2xl animate-fade-in">
-            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-emerald-700 dark:text-emerald-300 font-semibold">Profile updated successfully!</p>
-          </div>
-        )}
+        {/* 1. PROFILE SECTION (QUIET EDITORIAL) */}
+        <section className="space-y-4">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
+            Profile Details
+          </span>
 
-        {/* Error Feedback Alert */}
-        {error && (
-          <div className="mb-6 flex items-start gap-3 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 p-4 rounded-2xl animate-shake">
-            <User className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
-          </div>
-        )}
+          <div className="space-y-3 pt-1">
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">Username</label>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">Email Address</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
+              />
+            </div>
 
-          {/* Section: Personal Info */}
-          <div className="space-y-5">
-            <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-2 font-display">
-              <User className="w-4.5 h-4.5 text-violet-600 dark:text-violet-400" />
-              Personal Details
-            </h3>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Username */}
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Username</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <User className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                    </span>
-                    <input
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Email Address</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Mail className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                    </span>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Update Password (Optional)</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  </span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave blank to keep current password"
-                    className="w-full pl-10 pr-10 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">New Password (leave blank to keep current)</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
+              />
             </div>
           </div>
+        </section>
 
-          {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-xs font-bold shadow-lg shadow-violet-500/20 cursor-pointer transition-all duration-200 disabled:opacity-50"
-            >
-              {loading ? "Saving Changes..." : "Save Preferences"}
-            </button>
-          </div>
-        </form>
+        {/* 2. AUTOMATION & PREFERENCES SECTION */}
+        <section className="space-y-4 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
+            Automation & Display
+          </span>
 
-        {/* Section: App Settings */}
-        {onSetActiveTab && (
-          <div className="space-y-5 pt-6 mt-6 border-t border-zinc-100 dark:border-zinc-800 animate-fade-in">
-            <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-2 font-display">
-              <Settings className="w-4.5 h-4.5 text-violet-600 dark:text-violet-400" />
-              App Preferences
-            </h3>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
+          <div className="space-y-4 pt-1">
+            {/* Default Expense Account */}
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">
+                Default Expense Account
+              </label>
+              <p className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC] mb-2">
+                When you record an expense without explicitly mentioning an account, SALDO automatically resolves it to this account.
+              </p>
+              <select
+                value={defaultAccount}
+                onChange={(e) => setDefaultAccount(e.target.value)}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B] cursor-pointer"
+              >
+                <option value="">Auto-detect / First Account</option>
+                {accounts.map((a) => (
+                  <option key={a._id} value={a._id}>{a.name} ({a.type})</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Display Currency */}
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">
+                Display Currency
+              </label>
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B] cursor-pointer"
+              >
+                <option value="IDR">IDR (Indonesian Rupiah - Rp)</option>
+                <option value="USD">USD (US Dollar - $)</option>
+                <option value="EUR">EUR (Euro - €)</option>
+              </select>
+            </div>
+
+            {/* Dark Mode Toggle */}
+            <div className="flex justify-between items-center pt-2">
+              <div>
+                <p className="text-xs font-bold text-[#09261E] dark:text-white">Dark Mode Appearance</p>
+                <p className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC]">Toggle between soft mint and deep forest foundations</p>
+              </div>
               <button
                 type="button"
-                onClick={() => onSetActiveTab("categories")}
-                className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-205 dark:border-zinc-800 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs transition-all w-full cursor-pointer group"
+                onClick={() => setDarkMode(!darkMode)}
+                className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${darkMode ? "bg-[#00A86B]" : "bg-zinc-300"}`}
               >
-                <span className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform" />
-                  Manage Category Tags
-                </span>
-                <span className="text-zinc-400 group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className={`w-4.5 h-4.5 bg-white rounded-full absolute top-0.75 transition-transform ${darkMode ? "left-5.5" : "left-1"}`} />
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </section>
+
+        {/* 3. CATEGORIES SECTION */}
+        <section className="space-y-3 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
+                Category Tags
+              </span>
+              <p className="text-xs text-[#09261E] dark:text-white font-bold mt-0.5">Manage Categories & Labels</p>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenCategoriesModal}
+              className="px-3.5 py-1.5 bg-[#E8F5EE] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] text-[#00A86B] rounded-lg text-xs font-bold hover:bg-[#D3ECE0] transition-colors cursor-pointer"
+            >
+              Manage Tags →
+            </button>
+          </div>
+        </section>
+
+        {/* 4. ACTIONS & SIGN OUT */}
+        <div className="pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C] space-y-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full py-2.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save Preferences"}
+          </button>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+
+      </form>
     </div>
   );
 };

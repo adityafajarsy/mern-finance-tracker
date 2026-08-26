@@ -15,6 +15,7 @@ import accountRoutes from "./routes/accounts.js";
 import categoryRoutes from "./routes/categories.js";
 import transactionRoutes from "./routes/transactions.js";
 import statsRoutes from "./routes/stats.js";
+import captureRoutes from "./routes/capture.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/accounts", accountRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/capture", captureRoutes);
 
 // ES Modules __dirname resolution
 const __filename = fileURLToPath(import.meta.url);

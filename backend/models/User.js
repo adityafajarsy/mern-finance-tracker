@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    defaultAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+    },
   },
   {
     timestamps: true,

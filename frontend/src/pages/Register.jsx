@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Vault, Mail, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import hpHeroImage from "../assets/hp_hero.webp";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +19,7 @@ const Register = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/app");
     }
   }, [user, navigate]);
 
@@ -28,7 +30,7 @@ const Register = () => {
 
     try {
       await register(username, email, password);
-      navigate("/");
+      navigate("/app");
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {
@@ -37,129 +39,232 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 transition-colors duration-300 relative overflow-hidden">
-      {/* Wide Grid Pattern Background */}
-      <div className="absolute inset-0 bg-grid-pattern pointer-events-none"></div>
-
-      {/* Glowing blur effects */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-violet-500/10 dark:bg-violet-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-violet-600/10 dark:bg-violet-600/5 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="w-full max-w-md bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-xl p-8 relative overflow-hidden transition-all duration-300 z-10">
-
-        {/* Header */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-violet-600 dark:bg-violet-500 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30 mb-4 animate-bounce-subtle">
-            <Vault className="w-6 h-6 text-white" />
-          </div>
-          <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight flex items-center gap-0.5">
-            VAULT
-            <span className="text-violet-600 dark:text-violet-400">.</span>
-          </h2>
-          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-2">Start your wealth journey</p>
+    <div className="w-screen h-screen min-h-screen bg-white dark:bg-[#071913] text-[#09261E] dark:text-[#E2F2EB] grid grid-cols-1 md:grid-cols-12 overflow-hidden font-sans select-none">
+      
+      {/* ========================================================================= */}
+      {/* LEFT PANEL: 100% Height Full-Screen Deep Green Visual With Swirls & Dots  */}
+      {/* ========================================================================= */}
+      <div className="hidden md:flex md:col-span-5 lg:col-span-5 bg-gradient-to-br from-[#061F16] via-[#09261E] to-[#04140E] p-8 lg:p-12 relative flex-col justify-between overflow-hidden text-white h-full">
+        
+        {/* Dot Grid Matrix Pattern 1 (Top-Right) */}
+        <div className="absolute top-8 right-8 opacity-25 pointer-events-none">
+          <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+            <pattern id="reg-dot-full-1" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+              <circle cx="2.5" cy="2.5" r="1.8" fill="#00A86B" />
+            </pattern>
+            <rect width="100" height="100" fill="url(#reg-dot-full-1)" />
+          </svg>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 flex items-start gap-3 bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 p-4 rounded-2xl animate-shake">
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700 dark:text-red-300 font-medium">{error}</p>
-          </div>
-        )}
+        {/* Dot Grid Matrix Pattern 2 (Bottom-Left) */}
+        <div className="absolute bottom-8 left-8 opacity-20 pointer-events-none">
+          <svg width="90" height="90" viewBox="0 0 90 90" fill="none">
+            <pattern id="reg-dot-full-2" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.5" fill="#E8F5EE" />
+            </pattern>
+            <rect width="90" height="90" fill="url(#reg-dot-full-2)" />
+          </svg>
+        </div>
 
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username Field */}
-          <div>
-            <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Username</label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-zinc-400 dark:text-zinc-500" />
-              </span>
+        {/* Swirling Organic Green Vector Lines */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-85">
+          <svg viewBox="0 0 500 700" fill="none" className="w-full h-full">
+            <path
+              d="M -60 420 
+                 C 80 540, 160 580, 270 540 
+                 C 340 510, 360 410, 300 350 
+                 C 230 280, 140 330, 160 450 
+                 C 180 570, 320 600, 440 460 
+                 C 510 380, 540 220, 580 130"
+              stroke="#00A86B"
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M -40 200 
+                 C 90 140, 230 180, 320 280 
+                 C 400 380, 510 350, 570 240"
+              stroke="#00A86B"
+              strokeWidth="8"
+              strokeLinecap="round"
+              opacity="0.35"
+            />
+          </svg>
+        </div>
+
+        {/* Ambient Center Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#00A86B]/25 blur-3xl rounded-full pointer-events-none" />
+
+        {/* Top Wordmark */}
+        <div className="relative z-10">
+          <Link to="/" className="flex items-center gap-1.5 font-display font-black text-2xl tracking-tight text-white hover:opacity-90 transition-opacity">
+            <span>SALDO</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00A86B]"></span>
+          </Link>
+        </div>
+
+        {/* Central 3D Product Visual */}
+        <div className="relative z-10 flex items-center justify-center my-auto py-6">
+          <div className="relative w-56 sm:w-64 lg:w-72 transform -rotate-6 hover:rotate-0 transition-transform duration-700 ease-out">
+            <img
+              src={hpHeroImage}
+              alt="SALDO Visual"
+              className="w-full h-auto object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.6)]"
+            />
+          </div>
+        </div>
+
+        {/* Bottom Statement */}
+        <div className="relative z-10 space-y-0.5">
+          <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00A86B]">
+            Get Started Free
+          </p>
+          <p className="text-xs font-medium text-[#B7DFCD]">
+            Say what happened. SALDO handles the rest.
+          </p>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* RIGHT PANEL: 100% Height Full-Screen Editorial Register Form              */}
+      {/* ========================================================================= */}
+      <div className="col-span-1 md:col-span-7 lg:col-span-7 p-6 sm:p-12 lg:p-16 flex flex-col justify-between h-full overflow-y-auto bg-white dark:bg-[#071913]">
+        
+        {/* Mobile Top Brand (Hidden on Desktop) */}
+        <div className="md:hidden flex items-center justify-between pb-6 border-b border-[#D1EADE]/60">
+          <Link to="/" className="flex items-center gap-1.5 font-display font-black text-xl tracking-tight text-[#09261E] dark:text-white">
+            <span>SALDO</span>
+            <span className="w-2 h-2 rounded-full bg-[#00A86B]"></span>
+          </Link>
+        </div>
+
+        <div className="max-w-lg w-full mx-auto my-auto space-y-7 py-6">
+          
+          {/* Header Copy */}
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+              Create Account
+            </h1>
+            <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+              Join SALDO today to track your spending without spreadsheets and understand what's next.
+            </p>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+            </div>
+          )}
+
+          {/* Form Fields */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Username Field Container */}
+            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                Your Name / Username
+              </label>
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="john_doe"
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white placeholder-zinc-400/80 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 transition-all font-medium text-sm"
+                placeholder="Aditya"
+                className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
               />
             </div>
-          </div>
 
-          {/* Email Field */}
-          <div>
-            <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Email Address</label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-zinc-400 dark:text-zinc-500" />
-              </span>
+            {/* Email Field Container */}
+            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                Enter your email
+              </label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white placeholder-zinc-400/80 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 transition-all font-medium text-sm"
+                placeholder="johndoe@mail.domain"
+                className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
               />
             </div>
-          </div>
 
-          {/* Password Field */}
-          <div>
-            <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Password</label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-zinc-400 dark:text-zinc-500" />
-              </span>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-11 pr-11 py-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white placeholder-zinc-400/80 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 transition-all font-medium text-sm"
-              />
+            {/* Password Field Container */}
+            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                Create a Password
+              </label>
+              <div className="flex items-center justify-between mt-1">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Terms Agreement */}
+            <div className="pt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                <input
+                  type="checkbox"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  required
+                  className="w-4 h-4 rounded text-[#00A86B] focus:ring-[#00A86B] border-[#D1EADE] cursor-pointer"
+                />
+                <span>I agree to the Terms of Service & Privacy Policy</span>
+              </label>
+            </div>
+
+            {/* Bottom Row: Login link on Left & Register button on Right */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-[#D1EADE]/50 dark:border-[#14382C]">
+              <div>
+                <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                  Already have an account?
+                </p>
+                <Link
+                  to="/login"
+                  className="text-xs font-black text-[#09261E] dark:text-white hover:text-[#00A86B] dark:hover:text-[#00A86B] transition-colors inline-flex items-center gap-0.5 mt-0.5"
+                >
+                  <span>Login Now</span>
+                  <span className="text-[#00A86B] tracking-tight">{'>>>'}</span>
+                </Link>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-400 hover:text-violet-600 dark:hover:text-zinc-300 cursor-pointer"
+                type="submit"
+                disabled={loading}
+                className="px-10 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {loading ? "Creating..." : "Sign Up"}
               </button>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 text-white rounded-2xl font-bold shadow-lg shadow-violet-500/15 hover:shadow-violet-500/25 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 disabled:opacity-50 transition-all cursor-pointer mt-4"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <>
-                Create Account
-                <ArrowRight className="w-5 h-5" />
-              </>
-            )}
-          </button>
-        </form>
+          </form>
 
-        {/* Login Redirect Link */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-semibold">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-violet-600 dark:text-violet-400 font-bold hover:underline"
-            >
-              Sign In
-            </Link>
-          </p>
         </div>
+
+        {/* Footer info */}
+        <div className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC] text-center pt-4">
+          © {new Date().getFullYear()} SALDO. All rights reserved.
+        </div>
+
       </div>
+
     </div>
   );
 };

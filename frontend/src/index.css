@@ -7,19 +7,42 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', sans-serif;
+
+  --color-mint-50: #F4FAF6;
+  --color-mint-100: #E8F5EE;
+  --color-mint-200: #D3ECE0;
+  --color-mint-300: #B7DFCD;
+  --color-mint-400: #88C8AC;
+
+  --color-forest-900: #08241B;
+  --color-forest-850: #0B2C22;
+  --color-forest-800: #0E362A;
+  --color-forest-700: #14493A;
+  --color-forest-600: #1C5F4D;
+
+  --color-saldo-500: #00A86B;
+  --color-saldo-600: #00935D;
+  --color-saldo-400: #10B981;
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #E8F5EE;
+  color: #08241B;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body, body.dark {
+  background-color: #071913;
+  color: #E2F2EB;
 }
 
 h1, h2, h3, h4, h5, h6, .font-display {
   font-family: 'Outfit', sans-serif;
 }
 
-/* Custom transitions and scrollbar for a premium fintech feel */
+/* Custom transitions and scrollbar for SALDO editorial feel */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -30,65 +53,99 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(109, 40, 217, 0.1);
+  background: rgba(0, 168, 107, 0.15);
   border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(109, 40, 217, 0.25);
+  background: rgba(0, 168, 107, 0.35);
 }
 
-/* Custom Micro-Animations */
+/* Custom Keyframe Animations */
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scale-up {
-  from { transform: scale(0.96); opacity: 0; }
+  from { transform: scale(0.97); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s infinite ease-in-out;
-}
-
-.animate-shake {
-  animation: shake 0.2s ease-in-out 2;
-}
-
 .animate-fade-in {
-  animation: fade-in 0.2s ease-out;
+  animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-scale-up {
-  animation: scale-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-spin-slow {
-  animation: spin 12s linear infinite;
+.animate-bounce-subtle {
+  animation: bounce-subtle 2.5s infinite ease-in-out;
 }
 
-/* Custom grid pattern background */
-.bg-grid-pattern {
-  background-image: 
-    linear-gradient(to right, rgba(124, 58, 237, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(124, 58, 237, 0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
+.animate-flow-dash {
+  stroke-dasharray: 8 6;
+  animation: flow-dash 30s linear infinite;
 }
-.dark .bg-grid-pattern {
-  background-image: 
-    linear-gradient(to right, rgba(139, 92, 246, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(139, 92, 246, 0.015) 1px, transparent 1px);
+
+/* Glassmorphic and subtle surfaces */
+.bg-mint-glass {
+  background: rgba(232, 245, 238, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.dark .bg-mint-glass {
+  background: rgba(7, 25, 19, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+@keyframes waveDraw {
+  0% {
+    stroke-dashoffset: 700;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes subtleDrift {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+.animate-wave-drift {
+  animation: subtleDrift 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-wave-draw,
+  .animate-wave-drift,
+  .animate-fade-in,
+  .animate-scale-up,
+  .animate-bounce-subtle,
+  .animate-flow-dash {
+    animation: none !important;
+    transition: none !important;
+  }
 }

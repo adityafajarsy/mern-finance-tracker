@@ -109,7 +109,9 @@ router.post("/login", async (req, res) => {
 // @access  Private
 router.get("/me", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const user = await User.findById(req.user._id)
+      .select("-password")
+      .populate("defaultAccount", "name type color");
     if (user) {
       res.json(user);
     } else {
@@ -120,7 +122,7 @@ router.get("/me", protect, async (req, res) => {
   }
 });
 
-// @desc    Update user profile settings (currency or dark mode)
+// @desc    Update user profile settings (currency, dark mode, default account)
 // @route   PUT /api/users/profile
 // @access  Private
 router.put("/profile", protect, async (req, res) => {
@@ -136,6 +138,9 @@ router.put("/profile", protect, async (req, res) => {
       if (req.body.darkMode !== undefined) {
         user.darkMode = req.body.darkMode;
       }
+      if (req.body.defaultAccount !== undefined) {
+        user.defaultAccount = req.body.defaultAccount || null;
+      }
 
       if (req.body.password) {
         user.password = req.body.password;
@@ -143,13 +148,18 @@ router.put("/profile", protect, async (req, res) => {
 
       const updatedUser = await user.save();
 
+      const populatedUser = await User.findById(updatedUser._id)
+        .select("-password")
+        .populate("defaultAccount", "name type color");
+
       res.json({
-        _id: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        currency: updatedUser.currency,
-        darkMode: updatedUser.darkMode,
-        token: generateToken(updatedUser._id),
+        _id: populatedUser._id,
+        username: populatedUser.username,
+        email: populatedUser.email,
+        currency: populatedUser.currency,
+        darkMode: populatedUser.darkMode,
+        defaultAccount: populatedUser.defaultAccount,
+        token: generateToken(populatedUser._id),
       });
     } else {
       res.status(404).json({ message: "User not found" });

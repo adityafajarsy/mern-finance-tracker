@@ -2,93 +2,76 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
-// Panel imports
-import DashboardOverview from "../components/DashboardOverview";
-import TransactionsPanel from "../components/TransactionsPanel";
+// Views & Panels
+import HomeView from "../components/HomeView";
+import InsightsView from "../components/InsightsView";
 import AccountsPanel from "../components/AccountsPanel";
-import CategoriesPanel from "../components/CategoriesPanel";
-import AnalyticsPanel from "../components/AnalyticsPanel";
 import SettingsPanel from "../components/SettingsPanel";
-import ReportsPanel from "../components/ReportsPanel";
+import CategoriesPanel from "../components/CategoriesPanel";
+import CaptureModal from "../components/CaptureModal";
+import TransactionHistoryModal from "../components/TransactionHistoryModal";
 
 // Icons
 import {
   Home,
-  FileText,
-  Landmark,
   BarChart3,
-  Tag,
+  Landmark,
   Settings,
-  X,
   Plus,
-  BookOpen,
   LogOut,
   Sun,
   Moon,
   User,
-  Vault
+  ArrowLeftRight,
+  X,
+  Sparkles,
+  ArrowUpRight
 } from "lucide-react";
 
 const Dashboard = () => {
-  const { authFetch, user, handleResponse } = useAuth();
+  const { authFetch, user, updateProfile, logout, handleResponse } = useAuth();
 
-  const formatCurrency = (amount) => {
-    return `Rp ${amount.toLocaleString("id-ID")}`;
-  };
+  // Navigation State (4 primary destinations)
+  const [activeTab, setActiveTab] = useState("home");
 
-  const handleAmountChange = (e) => {
-    const value = e.target.value;
-    const rawValue = value.replace(/\D/g, "");
-    if (rawValue === "") {
-      setAmount("");
-      return;
-    }
-    const formatted = Number(rawValue).toLocaleString("id-ID");
-    setAmount(formatted);
-  };
-
-  // Navigation state
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Global Finance States
+  // Global Financial Data States
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Transaction Modal state
-  const [showTxModal, setShowTxModal] = useState(false);
-  const [txModalType, setTxModalType] = useState("Expense"); // Income, Expense, Transfer
-  const [editTx, setEditTx] = useState(null);
+  // Floating Instant Input State
+  const [floatingInput, setFloatingInput] = useState("");
+  const [captureInitialText, setCaptureInitialText] = useState("");
 
-  // Modal Form States
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [accountId, setAccountId] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [destAccountId, setDestAccountId] = useState("");
-  const [modalError, setModalError] = useState("");
+  // Modals
+  const [showCaptureModal, setShowCaptureModal] = useState(false);
+  const [showLedgerModal, setShowLedgerModal] = useState(false);
+  const [ledgerInitialAccountId, setLedgerInitialAccountId] = useState(null);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+
+  // Quick Transfer Modal Form States
+  const [transferSource, setTransferSource] = useState("");
+  const [transferDest, setTransferDest] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferDesc, setTransferDesc] = useState("Transfer Antar-Akun");
+  const [transferError, setTransferError] = useState("");
+  const [transferSaving, setTransferSaving] = useState(false);
 
   const fetchData = async () => {
     try {
-      // Fetch Accounts
-      const accRes = await authFetch("/api/accounts");
-      const accData = await accRes.json();
-      if (accRes.ok) setAccounts(accData);
+      const [accRes, catRes, sumRes] = await Promise.all([
+        authFetch("/api/accounts"),
+        authFetch("/api/categories"),
+        authFetch("/api/stats/summary"),
+      ]);
 
-      // Fetch Categories
-      const catRes = await authFetch("/api/categories");
-      const catData = await catRes.json();
-      if (catRes.ok) setCategories(catData);
-
-      // Fetch Stats Summary
-      const summaryRes = await authFetch("/api/stats/summary");
-      const summaryData = await summaryRes.json();
-      if (summaryRes.ok) setSummary(summaryData);
-
+      if (accRes.ok) setAccounts(await accRes.json());
+      if (catRes.ok) setCategories(await catRes.json());
+      if (sumRes.ok) setSummary(await sumRes.json());
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -134,12 +117,82 @@ const Dashboard = () => {
     }
   };
 
-  // --- CRUD Category Operations ---
-  const handleCreateCategory = async (categoryPayload) => {
+  const handleSetDefaultAccount = async (accountId) => {
+    try {
+      const res = await authFetch("/api/auth/profile", {
+        method: "PUT",
+        body: JSON.stringify({ defaultAccount: accountId }),
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        handleResponse(updatedUser);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // --- Transaction & Transfer Operations ---
+  const handleSaveTransaction = async (payload) => {
+    const res = await authFetch("/api/transactions", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to save transaction");
+    }
+
+    await fetchData();
+  };
+
+  const handleExecuteTransfer = async (e) => {
+    e.preventDefault();
+    setTransferError("");
+
+    const cleanAmt = parseFloat(String(transferAmount).replace(/\./g, ""));
+    if (isNaN(cleanAmt) || cleanAmt <= 0) {
+      setTransferError("Please enter a valid transfer amount");
+      return;
+    }
+
+    if (!transferSource || !transferDest) {
+      setTransferError("Please select both source and destination accounts");
+      return;
+    }
+
+    if (transferSource === transferDest) {
+      setTransferError("Source and destination accounts must be different");
+      return;
+    }
+
+    setTransferSaving(true);
+    try {
+      await handleSaveTransaction({
+        type: "Transfer",
+        amount: cleanAmt,
+        description: transferDesc.trim() || "Transfer Antar-Akun",
+        account: transferSource,
+        destinationAccount: transferDest,
+      });
+
+      setShowTransferModal(false);
+      setTransferAmount("");
+      setTransferDesc("Transfer Antar-Akun");
+    } catch (err) {
+      setTransferError(err.message || "Failed to execute transfer");
+    } finally {
+      setTransferSaving(false);
+    }
+  };
+
+  // --- Category CRUD Operations ---
+  const handleCreateCategory = async (payload) => {
     try {
       const res = await authFetch("/api/categories", {
         method: "POST",
-        body: JSON.stringify(categoryPayload),
+        body: JSON.stringify(payload),
       });
       if (res.ok) fetchData();
     } catch (err) {
@@ -147,11 +200,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdateCategory = async (id, categoryPayload) => {
+  const handleUpdateCategory = async (id, payload) => {
     try {
       const res = await authFetch(`/api/categories/${id}`, {
         method: "PUT",
-        body: JSON.stringify(categoryPayload),
+        body: JSON.stringify(payload),
       });
       if (res.ok) fetchData();
     } catch (err) {
@@ -170,188 +223,6 @@ const Dashboard = () => {
     }
   };
 
-  // --- CRUD Transaction Operations ---
-  const handleOpenTransactionModal = (type, tx = null, defaultDate = null) => {
-    setTxModalType(type);
-    setEditTx(tx);
-    setModalError("");
-
-    if (tx) {
-      setAmount(tx.amount.toLocaleString("id-ID"));
-      setDescription(tx.description || "");
-      setDate(new Date(tx.date).toISOString().split("T")[0]);
-      setAccountId(tx.account?._id || tx.account || "");
-      setCategoryId(tx.category?._id || tx.category || "");
-      setDestAccountId(tx.destinationAccount?._id || tx.destinationAccount || "");
-    } else {
-      setAmount("");
-      setDescription("");
-      setDate(defaultDate || new Date().toISOString().split("T")[0]);
-      setAccountId(accounts[0]?._id || "");
-
-      const filteredCats = categories.filter((c) => c.type === type);
-      setCategoryId(filteredCats[0]?._id || "");
-      setDestAccountId(accounts.find(a => a._id !== accounts[0]?._id)?._id || "");
-    }
-    setShowTxModal(true);
-  };
-
-  const handleSaveTransaction = async (e) => {
-    e.preventDefault();
-    setModalError("");
-
-    const cleanAmountStr = amount.replace(/\./g, "");
-    const parsedAmount = parseFloat(cleanAmountStr);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      setModalError("Please enter a valid amount greater than 0");
-      return;
-    }
-
-    if (!accountId) {
-      setModalError("Please select an account");
-      return;
-    }
-
-    if (txModalType !== "Transfer" && !categoryId) {
-      setModalError("Please select a category");
-      return;
-    }
-
-    if (txModalType === "Transfer" && !destAccountId) {
-      setModalError("Please select a destination account");
-      return;
-    }
-
-    const payload = {
-      type: txModalType,
-      amount: parsedAmount,
-      description,
-      date,
-      account: accountId,
-      category: txModalType === "Transfer" ? undefined : categoryId,
-      destinationAccount: txModalType === "Transfer" ? destAccountId : undefined,
-    };
-
-    try {
-      let res;
-      if (editTx) {
-        res = await authFetch(`/api/transactions/${editTx._id}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
-      } else {
-        res = await authFetch("/api/transactions", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-      }
-
-      const data = await handleResponse(res, "Failed to save transaction");
-      setShowTxModal(false);
-      fetchData(); // reload dashboard stats and balances
-    } catch (err) {
-      setModalError(err.message || "Network error, please try again");
-    }
-  };
-
-  const handleDeleteTransaction = async (id) => {
-    if (!confirm("Are you sure you want to delete this transaction? The account balances will be reverted.")) {
-      return;
-    }
-
-    try {
-      const res = await authFetch(`/api/transactions/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        fetchData();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Helper to adjust category picker dynamically in modal when tab switches
-  const handleModalTypeChange = (newType) => {
-    setTxModalType(newType);
-    const filteredCats = categories.filter((c) => c.type === newType);
-    setCategoryId(filteredCats[0]?._id || "");
-  };
-
-  // Render the selected sub-panel
-  const renderActivePanel = () => {
-    switch (activeTab) {
-      case "overview":
-        return (
-          <DashboardOverview
-            summary={summary}
-            user={user}
-            onSetActiveTab={setActiveTab}
-            onOpenTransactionModal={handleOpenTransactionModal}
-          />
-        );
-      case "transactions":
-        return (
-          <TransactionsPanel
-            accounts={accounts}
-            categories={categories}
-            onOpenTransactionModal={handleOpenTransactionModal}
-            onDeleteTransaction={handleDeleteTransaction}
-            onSetActiveTab={setActiveTab}
-          />
-        );
-      case "accounts":
-        return (
-          <AccountsPanel
-            accounts={accounts}
-            user={user}
-            onCreateAccount={handleCreateAccount}
-            onUpdateAccount={handleUpdateAccount}
-            onDeleteAccount={handleDeleteAccount}
-            onOpenTransactionModal={handleOpenTransactionModal}
-            onSetActiveTab={setActiveTab}
-          />
-        );
-      case "reports":
-        return (
-          <ReportsPanel
-            authFetch={authFetch}
-            handleResponse={handleResponse}
-            formatCurrency={formatCurrency}
-            accounts={accounts}
-            categories={categories}
-            summary={summary}
-            onOpenTransactionModal={handleOpenTransactionModal}
-            onDeleteTransaction={handleDeleteTransaction}
-            onSetActiveTab={setActiveTab}
-          />
-        );
-      case "categories":
-        return (
-          <CategoriesPanel
-            categories={categories}
-            onCreateCategory={handleCreateCategory}
-            onUpdateCategory={handleUpdateCategory}
-            onDeleteCategory={handleDeleteCategory}
-            onSetActiveTab={setActiveTab}
-          />
-        );
-      case "analytics":
-        return <AnalyticsPanel user={user} onSetActiveTab={setActiveTab} />;
-      case "settings":
-        return <SettingsPanel onSetActiveTab={setActiveTab} />;
-      default:
-        return <div>Sub-panel not found.</div>;
-    }
-  };
-
-  const navItems = [
-    { id: "overview", label: "Home", icon: <Home className="w-4.5 h-4.5" /> },
-    { id: "accounts", label: "Accounts", icon: <Landmark className="w-4.5 h-4.5" /> },
-    { id: "reports", label: "Reports", icon: <BookOpen className="w-4.5 h-4.5" /> },
-    { id: "settings", label: "Settings", icon: <Settings className="w-4.5 h-4.5" /> },
-  ];
-
   const toggleDarkMode = async () => {
     if (!user) return;
     const nextMode = !user.darkMode;
@@ -367,333 +238,473 @@ const Dashboard = () => {
     }
   };
 
-  const { logout, updateProfile } = useAuth();
+  // Floating Chatbox Submit
+  const handleFloatingSubmit = (e) => {
+    e.preventDefault();
+    if (!floatingInput.trim()) return;
+    setCaptureInitialText(floatingInput.trim());
+    setShowCaptureModal(true);
+    setFloatingInput("");
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-3 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold tracking-wide">Synchronizing vault...</p>
+  const navItems = [
+    { id: "home", label: "Home", icon: <Home className="w-4 h-4" /> },
+    { id: "insights", label: "Insights", icon: <BarChart3 className="w-4 h-4" /> },
+    { id: "accounts", label: "Accounts", icon: <Landmark className="w-4 h-4" /> },
+    { id: "settings", label: "Settings", icon: <Settings className="w-4 h-4" /> },
+  ];
+
+  const renderActivePanel = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="w-8 h-8 border-2 border-[#00A86B] border-t-transparent rounded-full animate-spin"></div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
+
+    switch (activeTab) {
+      case "home":
+        return (
+          <HomeView
+            summary={summary}
+            accounts={accounts}
+            onOpenCapture={() => {
+              setCaptureInitialText("");
+              setShowCaptureModal(true);
+            }}
+            onOpenLedger={() => {
+              setLedgerInitialAccountId(null);
+              setShowLedgerModal(true);
+            }}
+            onSetActiveTab={setActiveTab}
+            formatCurrency={(val) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`}
+          />
+        );
+
+      case "insights":
+        return (
+          <InsightsView
+            authFetch={authFetch}
+            formatCurrency={(val) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`}
+          />
+        );
+
+      case "accounts":
+        return (
+          <AccountsPanel
+            accounts={accounts}
+            defaultAccountId={user?.defaultAccount?._id || user?.defaultAccount}
+            onCreateAccount={handleCreateAccount}
+            onUpdateAccount={handleUpdateAccount}
+            onDeleteAccount={handleDeleteAccount}
+            onSetDefaultAccount={handleSetDefaultAccount}
+            onOpenLedger={(accId) => {
+              setLedgerInitialAccountId(accId);
+              setShowLedgerModal(true);
+            }}
+            onOpenTransfer={() => {
+              if (accounts.length >= 2) {
+                setTransferSource(accounts[0]._id);
+                setTransferDest(accounts[1]._id);
+                setShowTransferModal(true);
+              } else {
+                alert("You need at least 2 accounts to make transfers.");
+              }
+            }}
+          />
+        );
+
+      case "settings":
+        return (
+          <SettingsPanel
+            user={user}
+            accounts={accounts}
+            onUpdateProfile={updateProfile}
+            onOpenCategoriesModal={() => setShowCategoriesModal(true)}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300 flex flex-col md:flex-row pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#E8F5EE] dark:bg-[#071913] text-[#09261E] dark:text-[#E2F2EB] transition-colors duration-300 flex flex-col md:flex-row pb-28 md:pb-0 font-sans relative">
+      
+      {/* Mobile Top Header (Extremely Compact, Quiet, Refined) */}
+      <div className="md:hidden w-full border-b border-[#D1EADE]/70 dark:border-[#14382C] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-[#09261E]/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="flex items-center gap-1.5 font-display font-black text-lg tracking-tight text-[#09261E] dark:text-white">
+          <span>SALDO</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></span>
+        </div>
 
-      {/* Mobile Top Navbar (Hidden on Desktop) */}
-      <div className="md:hidden w-full">
-        <Navbar />
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={toggleDarkMode}
+            className="p-1.5 text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            title="Toggle Dark Mode"
+          >
+            {user?.darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("settings")}
+            className="w-7 h-7 bg-[#00A86B]/15 text-[#00A86B] rounded-full flex items-center justify-center font-bold text-xs shrink-0 cursor-pointer"
+            title="Settings / Profile"
+          >
+            {user?.username ? user.username.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
+          </button>
+        </div>
       </div>
 
-      {/* Desktop Navigation Sidebar (Hidden on Mobile) */}
-      <aside className="hidden md:flex md:flex-col md:w-64 fixed left-0 top-0 bottom-0 bg-white dark:bg-zinc-900/40 backdrop-blur-md border-r border-zinc-200/80 dark:border-zinc-800/80 z-30 p-6 justify-between select-none">
-        <div className="space-y-8">
+      {/* Desktop Editorial Sidebar (Quiet, Restrained, Non-bulky) */}
+      <aside className="hidden md:flex md:flex-col md:w-56 fixed left-0 top-0 bottom-0 bg-transparent border-r border-[#D1EADE]/70 dark:border-[#14382C] z-30 p-6 justify-between select-none">
+        <div className="space-y-6">
+          
           {/* Brand Logo */}
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="w-8 h-8 bg-violet-600 dark:bg-violet-500 rounded-xl flex items-center justify-center shadow-md shadow-violet-500/20">
-              <Vault className="w-4.5 h-4.5 text-white" />
-            </div>
-            <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white flex items-center gap-0.5">
-              WALLET
-              <span className="text-violet-600 dark:text-violet-400">.</span>
+          <div className="flex items-center gap-1.5 px-2">
+            <span className="text-xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+              SALDO
             </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></span>
           </div>
 
-          {/* Quick Action Button */}
+          {/* Primary Action Button */}
           <button
-            onClick={() => handleOpenTransactionModal("Expense")}
-            className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-violet-500/15 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+            onClick={() => {
+              setCaptureInitialText("");
+              setShowCaptureModal(true);
+            }}
+            className="w-full py-2.5 px-4 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-full text-xs font-bold shadow-sm shadow-[#00A86B]/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
           >
-            <Plus className="w-4 h-4" />
-            Record Entry
+            <Plus className="w-3.5 h-3.5" />
+            <span>Capture</span>
           </button>
 
           {/* Navigation Links */}
-          <nav className="space-y-1">
+          <nav className="space-y-1 pt-1">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${isActive
-                      ? "bg-violet-50/50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-                    }`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-white/80 dark:bg-[#09261E] text-[#00A86B] shadow-2xs"
+                      : "text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#09261E] dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
                 >
-                  <span className={`transition-transform duration-200 ${isActive ? "scale-110" : ""}`}>
+                  <span className={isActive ? "text-[#00A86B]" : "opacity-70"}>
                     {item.icon}
                   </span>
-                  {item.label}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Sidebar Footer (Profile + Settings Controls) */}
-        <div className="space-y-4 pt-6 border-t border-zinc-200/80 dark:border-zinc-800/80">
-          {/* Profile Card */}
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 bg-violet-100 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-900/50 text-violet-600 dark:text-violet-400 rounded-full flex items-center justify-center font-bold text-xs shrink-0">
-                {user?.username ? user.username.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+        {/* Sidebar Footer */}
+        <div className="space-y-3 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 bg-[#00A86B]/15 text-[#00A86B] rounded-full flex items-center justify-center font-bold text-xs shrink-0">
+                {user?.username ? user.username.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
               </div>
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 truncate">
+              <span className="text-xs font-bold text-[#09261E] dark:text-[#E2F2EB] truncate max-w-[90px]">
                 {user?.username}
               </span>
             </div>
 
-            {/* Dark Mode Switcher in Sidebar */}
             <button
               onClick={toggleDarkMode}
-              className="p-1.5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all cursor-pointer"
+              className="p-1.5 text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
               title="Toggle Dark Mode"
             >
-              {user?.darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              {user?.darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
 
-          {/* Logout button */}
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-2xl text-xs font-bold transition-all cursor-pointer"
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg text-xs font-bold transition-all cursor-pointer"
           >
-            <LogOut className="w-4.5 h-4.5" />
-            Sign Out
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Panel Content Area */}
-      <main className="flex-1 md:pl-64 w-full min-w-0">
-        <div className="max-w-5xl mx-auto w-full px-4 py-6 md:p-8">
+      {/* Main Editorial Content Container */}
+      <main className="flex-1 md:pl-56 w-full min-w-0 pb-28 md:pb-24">
+        <div className="max-w-4xl mx-auto w-full px-4 py-4 sm:p-8 md:p-10">
           {renderActivePanel()}
         </div>
       </main>
 
-      {/* Mobile Bottom Tab Navigation Bar (Sticky on mobile only) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-300 md:hidden pb-safe">
-        <div className="max-w-md mx-auto px-2 h-16 flex items-center justify-around relative">
-          {/* Home */}
+      {/* ========================================================================= */}
+      {/* 09A — MOBILE ONLY: FLOATING PRIMARY CAPTURE PILL BUTTON                   */}
+      {/* ========================================================================= */}
+      <div className="md:hidden fixed bottom-18 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <button
+          onClick={() => {
+            setCaptureInitialText("");
+            setShowCaptureModal(true);
+          }}
+          className="py-2.5 px-6 rounded-full bg-[#00A86B] hover:bg-[#00935D] active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-xl shadow-[#00A86B]/35 border border-white/20 transition-all cursor-pointer tracking-wide"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Quick Capture</span>
+          <Plus className="w-3.5 h-3.5 ml-0.5 opacity-90" />
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 09B — DESKTOP / NON-MOBILE: FLOATING INSTANT SMART CAPTURE INPUT BOX      */}
+      {/* ========================================================================= */}
+      <div className="hidden md:block fixed bottom-8 left-[calc(50%+7rem)] -translate-x-1/2 max-w-xl w-full px-6 z-30 pointer-events-auto">
+        <form
+          onSubmit={handleFloatingSubmit}
+          className="bg-white/90 dark:bg-[#09261E]/90 backdrop-blur-xl border border-[#D1EADE]/90 dark:border-[#14382C] rounded-full shadow-2xl shadow-[#09261E]/15 p-1.5 pl-5 flex items-center gap-3 transition-all hover:border-[#00A86B]/60 focus-within:border-[#00A86B] focus-within:ring-2 focus-within:ring-[#00A86B]/20"
+        >
+          <div className="flex items-center gap-2 text-[#00A86B] shrink-0">
+            <Sparkles className="w-4 h-4 text-[#00A86B]" />
+          </div>
+
+          <input
+            type="text"
+            value={floatingInput}
+            onChange={(e) => setFloatingInput(e.target.value)}
+            placeholder="Tell SALDO what happened... (e.g. beli kopi 25rb pake gopay)"
+            className="flex-1 bg-transparent text-xs sm:text-sm font-bold text-[#09261E] dark:text-white placeholder:text-[#1C5F4D]/50 dark:placeholder:text-[#88C8AC]/50 focus:outline-none min-w-0"
+          />
+
           <button
-            onClick={() => setActiveTab("overview")}
-            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "overview"
-                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
-                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
-              }`}
+            type="submit"
+            disabled={!floatingInput.trim()}
+            className="w-9 h-9 rounded-full bg-[#00A86B] hover:bg-[#00935D] text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-md shadow-[#00A86B]/25 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            title="Instant Capture"
           >
-            <Home className="w-4.5 h-4.5" />
-            <span className="text-[9px] tracking-wide font-medium">Home</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </button>
+        </form>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 10 — MOBILE BOTTOM NAVIGATION (4 ESSENTIAL DESTINATIONS)                  */}
+      {/* ========================================================================= */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#09261E]/95 backdrop-blur-lg border-t border-[#D1EADE]/80 dark:border-[#14382C] md:hidden pb-safe">
+        <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-between">
+          
+          <button
+            onClick={() => setActiveTab("home")}
+            className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${
+              activeTab === "home" ? "text-[#00A86B] font-bold" : "text-[#1C5F4D] dark:text-[#88C8AC] opacity-75"
+            }`}
+          >
+            <Home className="w-4 h-4" />
+            <span className="text-[10px]">Home</span>
           </button>
 
-          {/* Accounts */}
+          <button
+            onClick={() => setActiveTab("insights")}
+            className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${
+              activeTab === "insights" ? "text-[#00A86B] font-bold" : "text-[#1C5F4D] dark:text-[#88C8AC] opacity-75"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-[10px]">Insights</span>
+          </button>
+
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "accounts"
-                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
-                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
-              }`}
+            className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${
+              activeTab === "accounts" ? "text-[#00A86B] font-bold" : "text-[#1C5F4D] dark:text-[#88C8AC] opacity-75"
+            }`}
           >
-            <Landmark className="w-4.5 h-4.5" />
-            <span className="text-[9px] tracking-wide font-medium">Accounts</span>
+            <Landmark className="w-4 h-4" />
+            <span className="text-[10px]">Accounts</span>
           </button>
 
-          {/* Center Plus Button (float slightly above with thick border) */}
-          <button
-            onClick={() => handleOpenTransactionModal("Expense")}
-            className="w-12 h-12 bg-violet-600 dark:bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-violet-500/35 transform active:scale-95 transition-all -mt-6 border-4 border-white dark:border-zinc-900 z-50 hover:bg-violet-750 cursor-pointer"
-            title="Add Transaction"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-
-          {/* Reports */}
-          <button
-            onClick={() => setActiveTab("reports")}
-            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "reports"
-                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
-                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
-              }`}
-          >
-            <BookOpen className="w-4.5 h-4.5" />
-            <span className="text-[9px] tracking-wide font-medium">Reports</span>
-          </button>
-
-          {/* Settings */}
           <button
             onClick={() => setActiveTab("settings")}
-            className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${activeTab === "settings"
-                ? "text-violet-600 dark:text-violet-400 scale-105 font-bold"
-                : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700"
-              }`}
+            className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${
+              activeTab === "settings" ? "text-[#00A86B] font-bold" : "text-[#1C5F4D] dark:text-[#88C8AC] opacity-75"
+            }`}
           >
-            <Settings className="w-4.5 h-4.5" />
-            <span className="text-[9px] tracking-wide font-medium">Settings</span>
+            <Settings className="w-4 h-4" />
+            <span className="text-[10px]">Settings</span>
           </button>
         </div>
       </nav>
 
-      {/* Transaction Modal Overlay (Income / Expense / Transfer overlay drawer) */}
-      {showTxModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-2xl animate-scale-up relative">
-            <button
-              onClick={() => setShowTxModal(false)}
-              className="absolute top-4 right-4 p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 rounded-full cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {/* Hero Capture Modal */}
+      <CaptureModal
+        isOpen={showCaptureModal}
+        onClose={() => {
+          setShowCaptureModal(false);
+          setCaptureInitialText("");
+        }}
+        initialText={captureInitialText}
+        accounts={accounts}
+        categories={categories}
+        defaultAccountId={user?.defaultAccount?._id || user?.defaultAccount}
+        onSaveTransaction={handleSaveTransaction}
+        authFetch={authFetch}
+      />
 
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
-              {editTx ? "Edit Transaction" : "Record Transaction"}
-            </h3>
+      {/* Transaction History Modal */}
+      <TransactionHistoryModal
+        isOpen={showLedgerModal}
+        onClose={() => setShowLedgerModal(false)}
+        accounts={accounts}
+        categories={categories}
+        authFetch={authFetch}
+        initialAccountId={ledgerInitialAccountId}
+        onTransactionUpdated={fetchData}
+      />
 
-            {/* Error banner */}
-            {modalError && (
-              <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl text-xs font-semibold">
-                {modalError}
+      {/* Categories Modal */}
+      {showCategoriesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#09261E] rounded-2xl shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-[#D1EADE]/70 dark:border-[#14382C] flex justify-between items-center">
+              <h3 className="text-sm font-black text-[#09261E] dark:text-white font-display">Manage Category Tags</h3>
+              <button
+                onClick={() => setShowCategoriesModal(false)}
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <CategoriesPanel
+                categories={categories}
+                onCreateCategory={handleCreateCategory}
+                onUpdateCategory={handleUpdateCategory}
+                onDeleteCategory={handleDeleteCategory}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Modal */}
+      {showTransferModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-[#09261E] rounded-2xl p-6 shadow-2xl animate-scale-up space-y-4">
+            <div className="flex justify-between items-center border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center font-bold">
+                  <ArrowLeftRight className="w-3.5 h-3.5" />
+                </div>
+                <h3 className="text-sm font-black text-[#09261E] dark:text-white font-display">
+                  Transfer Funds
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {transferError && (
+              <div className="p-2.5 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 rounded-lg text-xs font-semibold">
+                {transferError}
               </div>
             )}
 
-            {/* Type selector tabs */}
-            {!editTx && (
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {["Expense", "Income", "Transfer"].map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => handleModalTypeChange(type)}
-                    className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all cursor-pointer ${txModalType === type
-                        ? type === "Income"
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/20 dark:border-emerald-900/50 dark:text-emerald-400"
-                          : type === "Expense"
-                            ? "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/50 dark:text-rose-400"
-                            : "bg-violet-50 border-violet-200 text-violet-700 dark:bg-violet-950/20 dark:border-violet-900/50 dark:text-violet-400"
-                        : "border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                      }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <form onSubmit={handleSaveTransaction} className="space-y-4">
-              {/* Amount input */}
+            <form onSubmit={handleExecuteTransfer} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Amount</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="0"
-                  value={amount}
-                  onChange={handleAmountChange}
-                  className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
-                />
-              </div>
-
-              {/* Source Account input */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                  {txModalType === "Transfer" ? "Source Account" : "Account"}
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  From Account (Source)
                 </label>
                 <select
-                  required
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
+                  value={transferSource}
+                  onChange={(e) => setTransferSource(e.target.value)}
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white"
                 >
-                  <option value="" disabled>Select Account</option>
-                  {accounts.map((acc) => (
-                    <option key={acc._id} value={acc._id}>{acc.name} ({formatCurrency(acc.balance)})</option>
+                  {accounts.map((a) => (
+                    <option key={a._id} value={a._id}>
+                      {a.name} (Rp {a.balance.toLocaleString("id-ID")})
+                    </option>
                   ))}
                 </select>
               </div>
 
-              {/* Destination Account (Only for Transfers) */}
-              {txModalType === "Transfer" && (
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Destination Account</label>
-                  <select
-                    required
-                    value={destAccountId}
-                    onChange={(e) => setDestAccountId(e.target.value)}
-                    className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
-                  >
-                    <option value="" disabled>Select Destination Account</option>
-                    {accounts.filter(a => a._id !== accountId).map((acc) => (
-                      <option key={acc._id} value={acc._id}>{acc.name} ({formatCurrency(acc.balance)})</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Category selector (Not for Transfers) */}
-              {txModalType !== "Transfer" && (
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Category Tag</label>
-                  <select
-                    required
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
-                  >
-                    <option value="" disabled>Select Category</option>
-                    {categories.filter(c => c.type === txModalType).map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Date selection */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Date</label>
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
-                />
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  To Account (Destination)
+                </label>
+                <select
+                  value={transferDest}
+                  onChange={(e) => setTransferDest(e.target.value)}
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white"
+                >
+                  {accounts.filter(a => a._id !== transferSource).map((a) => (
+                    <option key={a._id} value={a._id}>
+                      {a.name} (Rp {a.balance.toLocaleString("id-ID")})
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Description */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Notes / Description</label>
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Amount (Rp)
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Starbucks, Monthly salary bonus"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2.5 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
+                  required
+                  placeholder="0"
+                  value={transferAmount}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    setTransferAmount(raw ? Number(raw).toLocaleString("id-ID") : "");
+                  }}
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-sm font-black font-mono text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
                 />
               </div>
 
-              {/* Save Buttons */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  value={transferDesc}
+                  onChange={(e) => setTransferDesc(e.target.value)}
+                  placeholder="Transfer Dana"
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white"
+                />
+              </div>
+
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowTxModal(false)}
-                  className="flex-1 py-2.5 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl text-sm font-bold cursor-pointer"
+                  onClick={() => setShowTransferModal(false)}
+                  className="flex-1 py-2 border border-[#D1EADE] dark:border-[#14382C] text-[#1C5F4D] dark:text-[#88C8AC] rounded-lg text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-violet-500/15 cursor-pointer"
+                  disabled={transferSaving}
+                  className="flex-1 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
                 >
-                  Save Entry
+                  {transferSaving ? "Transferring..." : "Execute Transfer"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

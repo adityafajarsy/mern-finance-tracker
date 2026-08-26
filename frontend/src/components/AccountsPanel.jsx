@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, ArrowLeftRight, Landmark, CreditCard, Wallet, HelpCircle, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, ArrowLeftRight, Landmark, CreditCard, Wallet, HelpCircle, FileText, CheckCircle2 } from "lucide-react";
+import OrganicLine from "./ui/OrganicLine";
 
 const AccountsPanel = ({
-  accounts,
-  user,
+  accounts = [],
+  defaultAccountId = null,
   onCreateAccount,
-  onSetActiveTab,
   onUpdateAccount,
   onDeleteAccount,
-  onOpenTransactionModal,
+  onOpenLedger,
+  onSetDefaultAccount,
+  onOpenTransfer,
 }) => {
   const [showForm, setShowForm] = useState(false);
   const [editAccount, setEditAccount] = useState(null);
@@ -17,33 +19,31 @@ const AccountsPanel = ({
   const [name, setName] = useState("");
   const [type, setType] = useState("Bank");
   const [balance, setBalance] = useState("");
-  const [color, setColor] = useState("#7C3AED");
+  const [color, setColor] = useState("#00A86B");
 
   const formatCurrency = (amount) => {
-    return `Rp ${amount.toLocaleString("id-ID")}`;
+    return `Rp ${(amount || 0).toLocaleString("id-ID")}`;
   };
 
   const handleBalanceChange = (e) => {
-    const value = e.target.value;
-    const rawValue = value.replace(/\D/g, "");
+    const rawValue = e.target.value.replace(/\D/g, "");
     if (rawValue === "") {
       setBalance("");
       return;
     }
-    const formatted = Number(rawValue).toLocaleString("id-ID");
-    setBalance(formatted);
+    setBalance(Number(rawValue).toLocaleString("id-ID"));
   };
 
   const getAccountIcon = (accType) => {
     switch (accType) {
       case "Bank":
-        return <Landmark className="w-5 h-5" />;
+        return <Landmark className="w-4 h-4" />;
       case "E-Wallet":
-        return <CreditCard className="w-5 h-5" />;
+        return <CreditCard className="w-4 h-4" />;
       case "Cash":
-        return <Wallet className="w-5 h-5" />;
+        return <Wallet className="w-4 h-4" />;
       default:
-        return <HelpCircle className="w-5 h-5" />;
+        return <HelpCircle className="w-4 h-4" />;
     }
   };
 
@@ -52,7 +52,7 @@ const AccountsPanel = ({
     setName("");
     setType("Bank");
     setBalance("");
-    setColor("#7C3AED");
+    setColor("#00A86B");
     setShowForm(true);
   };
 
@@ -61,17 +61,17 @@ const AccountsPanel = ({
     setName(acc.name);
     setType(acc.type);
     setBalance(acc.balance.toLocaleString("id-ID"));
-    setColor(acc.color);
+    setColor(acc.color || "#00A86B");
     setShowForm(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const cleanBalanceStr = balance.toString().replace(/\./g, "");
+    const cleanBalance = parseFloat(String(balance).replace(/\./g, ""));
     const payload = {
       name,
       type,
-      balance: parseFloat(cleanBalanceStr) || 0,
+      balance: isNaN(cleanBalance) ? 0 : cleanBalance,
       color,
     };
 
@@ -86,203 +86,234 @@ const AccountsPanel = ({
   const totalSum = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in font-sans max-w-3xl">
       
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight font-display">Accounts</h2>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-            Total overall wealth: <span className="font-semibold text-zinc-700 dark:text-zinc-300 font-mono">{formatCurrency(totalSum)}</span>
-          </p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => onSetActiveTab("transactions")}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"
-          >
-            <FileText className="w-4 h-4" />
-            Ledger
-          </button>
-          <button
-            onClick={() => onOpenTransactionModal("Transfer")}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-bold cursor-pointer transition-all duration-200"
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-            Transfer
-          </button>
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-xs font-bold shadow-lg shadow-violet-500/20 cursor-pointer transition-all duration-200"
-          >
-            <Plus className="w-4 h-4" />
-            Add Account
-          </button>
-        </div>
-      </div>
-
-      {/* Account Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {accounts.map((acc) => (
-          <div
-            key={acc._id}
-            className="relative overflow-hidden bg-white dark:bg-zinc-900 border border-[#EEF2F7] dark:border-zinc-800/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-750 transition-all duration-300 flex flex-col justify-between h-40 group"
-          >
-            {/* Soft background visual cue (low opacity account-colored data wave) */}
-            <div 
-              className="absolute right-0 bottom-0 pointer-events-none opacity-[0.06] dark:opacity-[0.04] translate-x-2 translate-y-2 select-none group-hover:scale-105 transition-transform duration-500"
-              style={{ color: acc.color }}
-            >
-              <svg width="130" height="90" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 60 C30 45, 60 75, 90 45 C105 30, 115 40, 120 35 L120 80 L0 80 Z" fill="currentColor" />
-                <path d="M0 60 C30 45, 60 75, 90 45 C105 30, 115 40, 120 35" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-              </svg>
-            </div>
-
-            {/* Title / Header */}
-            <div className="flex justify-between items-start z-10">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xs border border-zinc-100 dark:border-zinc-800/80 transition-all duration-300 shrink-0"
-                  style={{ backgroundColor: acc.color + "12", color: acc.color }}
-                >
-                  {getAccountIcon(acc.type)}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 tracking-tight">{acc.name}</h4>
-                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider font-display">
-                    {acc.type}
-                  </span>
-                </div>
-              </div>
-
-              {/* Edit / Delete Buttons */}
-              <div className="flex gap-1">
-                <button
-                  onClick={() => handleOpenEdit(acc)}
-                  className="p-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 rounded-lg cursor-pointer transition-colors"
-                  title="Edit Account"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm(`Are you sure you want to delete account "${acc.name}"? All associated transactions will be deleted!`)) {
-                      onDeleteAccount(acc._id);
-                    }
-                  }}
-                  className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-500 rounded-lg cursor-pointer transition-colors"
-                  title="Delete Account"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Balance display */}
-            <div className="z-10">
-              <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Balance</p>
-              <h3 className="text-2xl font-black text-zinc-900 dark:text-white leading-none mt-1 font-mono tracking-tight">
-                {formatCurrency(acc.balance)}
-              </h3>
-            </div>
+      {/* 1. DOMINANT TOTAL WEALTH STATEMENT */}
+      <section className="space-y-2 border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-6">
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
+              Total Wealth
+            </span>
+            <h1 className="text-4xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white tabular-nums">
+              {formatCurrency(totalSum)}
+            </h1>
+            <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC]">
+              Distributed across {accounts.length} {accounts.length === 1 ? "account" : "registered accounts"}
+            </p>
           </div>
-        ))}
-      </div>
 
-      {/* Account Creation / Edit Overlay Modal Form */}
+          <div className="flex gap-2">
+            <button
+              onClick={onOpenTransfer}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] text-[#09261E] dark:text-white rounded-lg text-xs font-bold hover:bg-[#F4FAF6] cursor-pointer transition-all"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-[#00A86B]" />
+              <span>Transfer</span>
+            </button>
+
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Account</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. EXPRESSIVE ACCOUNT OBJECTS */}
+      <section className="space-y-3">
+        <div className="flex justify-between items-center px-1">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
+            Registered Accounts
+          </span>
+          <button
+            onClick={() => onOpenLedger()}
+            className="text-xs font-bold text-[#00A86B] hover:underline cursor-pointer"
+          >
+            All History →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {accounts.map((acc) => {
+            const isDefault = defaultAccountId === acc._id;
+            return (
+              <div
+                key={acc._id}
+                className="bg-white dark:bg-[#09261E] border border-[#D1EADE]/80 dark:border-[#14382C] rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-all relative overflow-hidden flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                        style={{ backgroundColor: acc.color || "#00A86B" }}
+                      >
+                        {getAccountIcon(acc.type)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="text-xs font-bold text-[#09261E] dark:text-white">{acc.name}</h4>
+                          {isDefault && (
+                            <span className="text-[8px] font-extrabold uppercase px-1 py-0.2 bg-[#E8F5EE] dark:bg-[#00A86B]/20 text-[#00A86B] rounded">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-[#1C5F4D] dark:text-[#88C8AC] font-medium">{acc.type}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleOpenEdit(acc)}
+                        className="p-1 text-zinc-400 hover:text-[#00A86B] rounded cursor-pointer"
+                        title="Edit Account"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteAccount(acc._id)}
+                        className="p-1 text-zinc-400 hover:text-rose-600 rounded cursor-pointer"
+                        title="Delete Account"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[9px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] tracking-wider">
+                      Balance
+                    </span>
+                    <p className="text-xl font-black font-display text-[#09261E] dark:text-white tracking-tight mt-0.5 tabular-nums">
+                      {formatCurrency(acc.balance)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-[#D1EADE]/50 dark:border-[#14382C] flex items-center justify-between text-xs">
+                  {!isDefault && onSetDefaultAccount ? (
+                    <button
+                      onClick={() => onSetDefaultAccount(acc._id)}
+                      className="text-[10px] font-bold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] flex items-center gap-1 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3 h-3" />
+                      Set as Default
+                    </button>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-[#00A86B] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Default Account
+                    </span>
+                  )}
+
+                  <button
+                    onClick={() => onOpenLedger(acc._id)}
+                    className="text-[10px] font-bold text-[#00A86B] hover:underline cursor-pointer"
+                  >
+                    History →
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Account Add/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-4 tracking-tight font-display">
-              {editAccount ? "Edit Account" : "Add Account"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-[#09261E] rounded-2xl p-6 shadow-2xl animate-scale-up space-y-4">
+            <h3 className="text-base font-black text-[#09261E] dark:text-white font-display">
+              {editAccount ? "Edit Account" : "Add New Account"}
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Account Name */}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Account Name</label>
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Account Name
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Bank BCA, Cash Wallet"
+                  placeholder="e.g. BCA, GoPay, Cash"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-medium"
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
                 />
               </div>
 
-              {/* Type Grid selection */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Account Type</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {["Bank", "Cash", "E-Wallet"].map((accType) => (
-                    <button
-                      key={accType}
-                      type="button"
-                      onClick={() => setType(accType)}
-                      className={`py-2.5 px-3 border rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                        type === accType
-                          ? "bg-violet-50 border-violet-200 text-violet-700 dark:bg-violet-950/20 dark:border-violet-900/50 dark:text-violet-400"
-                          : "border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                      }`}
-                    >
-                      {accType}
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Account Type
+                </label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white"
+                >
+                  <option value="Bank">Bank</option>
+                  <option value="E-Wallet">E-Wallet</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
-              {/* Balance */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Initial Balance</label>
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Initial Balance (Rp)
+                </label>
                 <input
                   type="text"
+                  required
                   placeholder="0"
                   value={balance}
                   onChange={handleBalanceChange}
-                  className="w-full p-3 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500 font-mono"
+                  className="w-full p-2 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-mono font-black text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B]"
                 />
               </div>
 
-              {/* Theme Color Picker */}
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Color Label</label>
-                <div className="flex gap-3 flex-wrap">
-                  {["#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#EC4899", "#3B82F6", "#06B6D4", "#6B7280"].map((hex) => (
+                <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
+                  Theme Color
+                </label>
+                <div className="flex gap-2">
+                  {["#00A86B", "#10B981", "#059669", "#0284C7", "#7C3AED", "#F59E0B"].map((c) => (
                     <button
-                      key={hex}
+                      key={c}
                       type="button"
-                      onClick={() => setColor(hex)}
-                      className={`w-7 h-7 rounded-full cursor-pointer transition-transform duration-200 border-2 ${
-                        color === hex ? "scale-110 border-zinc-400 dark:border-zinc-300" : "border-transparent"
-                      }`}
-                      style={{ backgroundColor: hex }}
+                      onClick={() => setColor(c)}
+                      className={`w-6 h-6 rounded-lg transition-all ${color === c ? "ring-2 ring-offset-2 ring-[#00A86B] scale-110" : ""}`}
+                      style={{ backgroundColor: c }}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-2.5 pt-2">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 py-3 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-2xl text-sm font-semibold cursor-pointer transition-all duration-200"
+                  className="flex-1 py-2 border border-[#D1EADE] dark:border-[#14382C] text-[#1C5F4D] dark:text-[#88C8AC] rounded-lg text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 text-white rounded-2xl text-sm font-bold shadow-lg shadow-violet-500/25 cursor-pointer transition-all duration-200"
+                  className="flex-1 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer"
                 >
-                  Save Account
+                  {editAccount ? "Save Changes" : "Create Account"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };
