@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap');
 
 @import "tailwindcss";
 
@@ -7,6 +7,7 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', sans-serif;
+  --font-urbanist: 'Urbanist', sans-serif;
 
   --color-mint-50: #F4FAF6;
   --color-mint-100: #E8F5EE;
@@ -40,6 +41,22 @@ body {
 
 h1, h2, h3, h4, h5, h6, .font-display {
   font-family: 'Outfit', sans-serif;
+}
+
+.font-urbanist,
+.font-urbanist h1,
+.font-urbanist h2,
+.font-urbanist h3,
+.font-urbanist h4,
+.font-urbanist h5,
+.font-urbanist h6,
+.font-urbanist .font-display,
+.font-urbanist p,
+.font-urbanist span,
+.font-urbanist a,
+.font-urbanist button,
+.font-urbanist input {
+  font-family: 'Urbanist', system-ui, -apple-system, sans-serif !important;
 }
 
 /* Custom transitions and scrollbar for SALDO editorial feel */

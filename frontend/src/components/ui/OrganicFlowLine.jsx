@@ -13,13 +13,13 @@ export const OrganicFlowLine = ({ className = "" }) => {
   return (
     <div className={`pointer-events-none select-none overflow-visible w-full h-full ${className}`}>
       
-      {/* 1. DESKTOP VIEWPORT SVG (Wide 2-Column Composition) */}
+      {/* 1. LAPTOP & DESKTOP VIEWPORT SVG (lg: and above >= 1024px) - 100% UNTOUCHED */}
       <svg
         viewBox="0 0 1600 700"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
-        className="hidden md:block w-full h-full overflow-visible"
+        className="hidden lg:block w-full h-full overflow-visible"
       >
         <defs>
           <style>
@@ -62,7 +62,55 @@ export const OrganicFlowLine = ({ className = "" }) => {
         </g>
       </svg>
 
-      {/* 2. MOBILE VIEWPORT SVG (Strictly positioned in lower phone area from bottom-left to top-right) */}
+      {/* 2. TABLET / IPAD MINI VIEWPORT SVG (md: to lg: 768px - 1023px) - ROUND & NEVER GEPENG */}
+      <svg
+        viewBox="0 0 900 700"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
+        className="hidden md:block lg:hidden w-full h-full overflow-visible"
+      >
+        <defs>
+          <style>
+            {`
+              .saldo-swirl-path-tablet {
+                stroke-dasharray: 4500;
+                stroke-dashoffset: ${drawn ? "0" : "4500"};
+                transition: stroke-dashoffset 4.8s cubic-bezier(0.22, 1, 0.36, 1);
+              }
+              @keyframes calm-drift-tab {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-3px); }
+              }
+              .saldo-swirl-container-tab {
+                animation: calm-drift-tab 9s ease-in-out infinite;
+              }
+            `}
+          </style>
+        </defs>
+
+        <g className="saldo-swirl-container-tab">
+          {/* Custom Proportional Curve for iPad Mini Aspect Ratio */}
+          <path
+            d="M -60 480 
+               C 30 570, 110 610, 190 590 
+               C 250 570, 270 480, 220 430 
+               C 170 380, 130 450, 160 520 
+               C 190 570, 260 560, 360 470 
+               C 470 370, 560 250, 650 180 
+               C 720 120, 790 140, 770 240 
+               C 750 330, 680 370, 700 440 
+               C 720 500, 800 450, 960 210"
+            stroke="#00A86B"
+            strokeWidth="11"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="saldo-swirl-path-tablet"
+          />
+        </g>
+      </svg>
+
+      {/* 3. MOBILE VIEWPORT SVG (< 768px) - 100% UNTOUCHED */}
       <svg
         viewBox="0 0 420 850"
         fill="none"

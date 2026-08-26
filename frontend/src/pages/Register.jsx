@@ -129,17 +129,57 @@ const Register = () => {
       {/* ========================================================================= */}
       {/* RIGHT PANEL: 100% Height Full-Screen Editorial Register Form              */}
       {/* ========================================================================= */}
-      <div className="col-span-1 md:col-span-7 lg:col-span-7 p-6 sm:p-12 lg:p-16 flex flex-col justify-between h-full overflow-y-auto bg-white dark:bg-[#071913]">
+      <div className="col-span-1 md:col-span-7 lg:col-span-7 p-6 sm:p-12 lg:p-16 flex flex-col justify-between h-full overflow-y-auto bg-white dark:bg-[#071913] relative">
         
+        {/* Mobile Ambient Background Decorations (Only visible on mobile screens) */}
+        <div className="md:hidden absolute inset-0 pointer-events-none overflow-hidden -z-0">
+          {/* Subtle Top-Right Ambient Swirling Vector Line */}
+          <div className="absolute -top-10 -right-12 w-72 h-72 opacity-25 dark:opacity-20 pointer-events-none">
+            <svg viewBox="0 0 300 300" fill="none" className="w-full h-full">
+              <path
+                d="M 50 280 C 120 180, 240 260, 260 120 C 270 50, 180 30, 120 70 C 60 110, 80 200, 160 210 C 240 220, 280 140, 290 20"
+                stroke="#00A86B"
+                strokeWidth="11"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* Subtle Bottom-Left Swirling Line */}
+          <div className="absolute -bottom-16 -left-16 w-64 h-64 opacity-20 dark:opacity-15 pointer-events-none">
+            <svg viewBox="0 0 300 300" fill="none" className="w-full h-full">
+              <path
+                d="M 20 280 C 80 220, 180 240, 210 160 C 240 80, 150 40, 90 90 C 40 130, 80 210, 180 210"
+                stroke="#00A86B"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* Dot Matrix Pattern at Top-Left */}
+          <div className="absolute top-20 left-4 opacity-30 dark:opacity-20 pointer-events-none">
+            <svg width="70" height="70" viewBox="0 0 70 70" fill="none">
+              <pattern id="mobile-reg-dots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.5" fill="#00A86B" />
+              </pattern>
+              <rect width="70" height="70" fill="url(#mobile-reg-dots)" />
+            </svg>
+          </div>
+
+          {/* Soft Emerald Center Glow */}
+          <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-[#00A86B]/10 dark:bg-[#00A86B]/15 blur-3xl rounded-full pointer-events-none" />
+        </div>
+
         {/* Mobile Top Brand (Hidden on Desktop) */}
-        <div className="md:hidden flex items-center justify-between pb-6 border-b border-[#D1EADE]/60">
+        <div className="md:hidden flex items-center justify-between pb-6 border-b border-[#D1EADE]/60 relative z-10">
           <Link to="/" className="flex items-center gap-1.5 font-display font-black text-xl tracking-tight text-[#09261E] dark:text-white">
             <span>SALDO</span>
             <span className="w-2 h-2 rounded-full bg-[#00A86B]"></span>
           </Link>
         </div>
 
-        <div className="max-w-lg w-full mx-auto my-auto space-y-7 py-6">
+        <div className="max-w-lg w-full mx-auto my-auto space-y-7 py-6 relative z-10">
           
           {/* Header Copy */}
           <div className="space-y-2">

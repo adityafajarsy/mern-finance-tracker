@@ -44,6 +44,44 @@ const Dashboard = () => {
   const [floatingInput, setFloatingInput] = useState("");
   const [captureInitialText, setCaptureInitialText] = useState("");
 
+  // Animated Typewriter State for AI Capture Bar
+  const placeholderPhrases = [
+    "Beli kopi 25rb pake GoPay...",
+    "Gaji masuk 8.500.000 ke BCA...",
+    "Kemarin makan siang 35k...",
+    "Transfer 150rb BCA ke OVO...",
+    "Beli bensin 50k cash...",
+    "Langganan Spotify 55rb..."
+  ];
+  const [typewriterText, setTypewriterText] = useState("");
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = placeholderPhrases[phraseIndex];
+    const typingSpeed = isDeleting ? 35 : 70;
+    const pauseTime = isDeleting ? 400 : 1800;
+
+    let timeout;
+
+    if (!isDeleting && typewriterText === currentPhrase) {
+      timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+    } else if (isDeleting && typewriterText === "") {
+      setIsDeleting(false);
+      setPhraseIndex((prev) => (prev + 1) % placeholderPhrases.length);
+    } else {
+      timeout = setTimeout(() => {
+        setTypewriterText((prev) =>
+          isDeleting
+            ? currentPhrase.substring(0, prev.length - 1)
+            : currentPhrase.substring(0, prev.length + 1)
+        );
+      }, typingSpeed);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [typewriterText, isDeleting, phraseIndex]);
+
   // Modals
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showLedgerModal, setShowLedgerModal] = useState(false);
@@ -277,6 +315,15 @@ const Dashboard = () => {
               setLedgerInitialAccountId(null);
               setShowLedgerModal(true);
             }}
+            onOpenTransfer={() => {
+              if (accounts.length >= 2) {
+                setTransferSource(accounts[0]._id);
+                setTransferDest(accounts[1]._id);
+                setShowTransferModal(true);
+              } else {
+                alert("You need at least 2 accounts to make transfers.");
+              }
+            }}
             onSetActiveTab={setActiveTab}
             formatCurrency={(val) => `Rp ${Number(val || 0).toLocaleString("id-ID")}`}
           />
@@ -331,22 +378,22 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8F5EE] dark:bg-[#071913] text-[#09261E] dark:text-[#E2F2EB] transition-colors duration-300 flex flex-col md:flex-row pb-28 md:pb-0 font-sans relative">
+    <div className="min-h-screen bg-[#E8F5EE] dark:bg-[#071913] text-[#09261E] dark:text-[#E2F2EB] transition-colors duration-300 flex flex-col md:flex-row font-sans relative">
       
-      {/* Mobile Top Header (Extremely Compact, Quiet, Refined) */}
-      <div className="md:hidden w-full border-b border-[#D1EADE]/70 dark:border-[#14382C] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-[#09261E]/80 backdrop-blur-md sticky top-0 z-30">
+      {/* Mobile Top Header (100% Transparent, Seamless Background) */}
+      <div className="md:hidden w-full px-5 pt-3 pb-1 flex items-center justify-between bg-transparent relative z-30">
         <div className="flex items-center gap-1.5 font-display font-black text-lg tracking-tight text-[#09261E] dark:text-white">
           <span>SALDO</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#00A86B]"></span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             onClick={toggleDarkMode}
-            className="p-1.5 text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors cursor-pointer"
             title="Toggle Dark Mode"
           >
-            {user?.darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+            {user?.darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
           </button>
 
           <button
@@ -439,54 +486,40 @@ const Dashboard = () => {
       </aside>
 
       {/* Main Editorial Content Container */}
-      <main className="flex-1 md:pl-56 w-full min-w-0 pb-28 md:pb-24">
-        <div className="max-w-4xl mx-auto w-full px-4 py-4 sm:p-8 md:p-10">
+      <main className="flex-1 md:pl-56 2xl:pl-64 w-full min-w-0 pb-0 md:pb-24">
+        <div className="max-w-4xl 2xl:max-w-6xl mx-auto w-full px-4 sm:px-6 py-0 md:p-10 2xl:p-12">
           {renderActivePanel()}
         </div>
       </main>
 
       {/* ========================================================================= */}
-      {/* 09A — MOBILE ONLY: FLOATING PRIMARY CAPTURE PILL BUTTON                   */}
+      {/* 09 — DYNAMIC AI CAPTURE INPUT BAR (WITH TYPEWRITER & AMBIENT GLOW)        */}
       {/* ========================================================================= */}
-      <div className="md:hidden fixed bottom-18 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-        <button
-          onClick={() => {
-            setCaptureInitialText("");
-            setShowCaptureModal(true);
-          }}
-          className="py-2.5 px-6 rounded-full bg-[#00A86B] hover:bg-[#00935D] active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-xl shadow-[#00A86B]/35 border border-white/20 transition-all cursor-pointer tracking-wide"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Quick Capture</span>
-          <Plus className="w-3.5 h-3.5 ml-0.5 opacity-90" />
-        </button>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 09B — DESKTOP / NON-MOBILE: FLOATING INSTANT SMART CAPTURE INPUT BOX      */}
-      {/* ========================================================================= */}
-      <div className="hidden md:block fixed bottom-8 left-[calc(50%+7rem)] -translate-x-1/2 max-w-xl w-full px-6 z-30 pointer-events-auto">
+      <div className="fixed bottom-22 md:bottom-8 left-1/2 -translate-x-1/2 md:left-[calc(50%+7rem)] 2xl:left-[calc(50%+8rem)] w-[92%] max-w-md md:max-w-lg 2xl:max-w-xl z-30 pointer-events-auto">
         <form
           onSubmit={handleFloatingSubmit}
-          className="bg-white/90 dark:bg-[#09261E]/90 backdrop-blur-xl border border-[#D1EADE]/90 dark:border-[#14382C] rounded-full shadow-2xl shadow-[#09261E]/15 p-1.5 pl-5 flex items-center gap-3 transition-all hover:border-[#00A86B]/60 focus-within:border-[#00A86B] focus-within:ring-2 focus-within:ring-[#00A86B]/20"
+          className="bg-white/95 dark:bg-[#09261E]/95 backdrop-blur-xl border border-[#00A86B]/40 dark:border-[#00A86B]/30 rounded-full shadow-2xl shadow-[#00A86B]/20 p-1.5 pl-3.5 sm:pl-4 flex items-center gap-2.5 transition-all hover:border-[#00A86B]/80 focus-within:border-[#00A86B] focus-within:ring-2 focus-within:ring-[#00A86B]/25 group"
         >
-          <div className="flex items-center gap-2 text-[#00A86B] shrink-0">
-            <Sparkles className="w-4 h-4 text-[#00A86B]" />
+          {/* Animated AI Sparkle Indicator with Pulse Glow */}
+          <div className="w-7 h-7 rounded-full bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center shrink-0">
+            <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#00A86B]" />
           </div>
 
+          {/* Input field with typewriter animated placeholder */}
           <input
             type="text"
             value={floatingInput}
             onChange={(e) => setFloatingInput(e.target.value)}
-            placeholder="Tell SALDO what happened... (e.g. beli kopi 25rb pake gopay)"
-            className="flex-1 bg-transparent text-xs sm:text-sm font-bold text-[#09261E] dark:text-white placeholder:text-[#1C5F4D]/50 dark:placeholder:text-[#88C8AC]/50 focus:outline-none min-w-0"
+            placeholder={typewriterText || "Tell SALDO what happened..."}
+            className="flex-1 bg-transparent text-xs sm:text-sm font-semibold text-[#09261E] dark:text-white placeholder:text-[#1C5F4D]/60 dark:placeholder:text-[#88C8AC]/60 focus:outline-none min-w-0"
           />
 
+          {/* Quick Submit Arrow Button */}
           <button
             type="submit"
             disabled={!floatingInput.trim()}
-            className="w-9 h-9 rounded-full bg-[#00A86B] hover:bg-[#00935D] text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-md shadow-[#00A86B]/25 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-            title="Instant Capture"
+            className="w-8 h-8 rounded-full bg-[#00A86B] hover:bg-[#00935D] text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-md shadow-[#00A86B]/30 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            title="Instant AI Capture"
           >
             <ArrowUpRight className="w-4 h-4" />
           </button>
