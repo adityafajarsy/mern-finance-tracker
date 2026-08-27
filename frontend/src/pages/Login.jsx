@@ -1,16 +1,30 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, CheckCircle2, ArrowLeft, KeyRound, Mail, Sparkles, ShieldAlert } from "lucide-react";
+import OtpInput from "../components/ui/OtpInput";
 import hpHeroImage from "../assets/hp_hero.webp";
 
 const Login = () => {
+  // Login states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Forgot Password modal/view states: "login" | "forgot_email" | "forgot_otp"
+  const [viewMode, setViewMode] = useState("login");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  // Status message states
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -22,16 +36,133 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = async (e) => {
+  // Standard Login Submit
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       navigate("/app");
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      setError(err.message || "Email atau password tidak valid");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Forgot Password Step 1: Send Reset OTP
+  const handleSendForgotOtp = async (e) => {
+    if (e) e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const cleanEmail = (forgotEmail || email).trim().toLowerCase();
+      if (!cleanEmail) {
+        throw new Error("Masukkan alamat email Anda");
+      }
+
+      const res = await fetch("/api/otp/send-forgot-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal mengirim kode reset");
+      }
+
+      setForgotEmail(cleanEmail);
+      setSuccessMsg(data.message || `Kode reset telah dikirim ke ${cleanEmail}`);
+      setViewMode("forgot_otp");
+      setForgotOtp("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Resend Forgot Password OTP
+  const handleResendForgotOtp = async () => {
+    setError("");
+    setSuccessMsg("");
+    setResendLoading(true);
+
+    try {
+      const cleanEmail = forgotEmail.trim().toLowerCase();
+      const res = await fetch("/api/otp/send-forgot-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal mengirim ulang kode reset");
+      }
+
+      setSuccessMsg(`Kode reset baru telah dikirim ke ${cleanEmail}`);
+    } catch (err) {
+      setError(err.message || "Gagal mengirim ulang kode");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Forgot Password Step 2: Verify OTP & Apply New Password
+  const handleVerifyAndResetPassword = async (e) => {
+    e.preventDefault();
+    if (forgotOtp.length < 6) {
+      setError("Masukkan 6-digit kode OTP reset lengkap");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("Password baru minimal 6 karakter");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Konfirmasi password tidak cocok");
+      return;
+    }
+
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/otp/verify-reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: forgotEmail.trim().toLowerCase(),
+          otp: forgotOtp.trim(),
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal mereset password");
+      }
+
+      // Reset success! Switch back to login with success alert prefilled
+      setEmail(forgotEmail);
+      setPassword("");
+      setViewMode("login");
+      setSuccessMsg(data.message || "Password berhasil diubah. Silakan login dengan password baru Anda.");
+      setError("");
+    } catch (err) {
+      setError(err.message || "Gagal mereset password. Periksa kode OTP Anda.");
     } finally {
       setLoading(false);
     }
@@ -126,7 +257,7 @@ const Login = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* RIGHT PANEL: 100% Height Full-Screen Editorial Login Form                 */}
+      {/* RIGHT PANEL: 100% Height Full-Screen Editorial Login / Forgot OTP Form     */}
       {/* ========================================================================= */}
       <div className="col-span-1 md:col-span-7 lg:col-span-7 p-6 sm:p-12 lg:p-16 flex flex-col justify-between h-full overflow-y-auto bg-white dark:bg-[#071913] relative">
         
@@ -159,10 +290,10 @@ const Login = () => {
           {/* Dot Matrix Pattern at Top-Left */}
           <div className="absolute top-20 left-4 opacity-30 dark:opacity-20 pointer-events-none">
             <svg width="70" height="70" viewBox="0 0 70 70" fill="none">
-              <pattern id="mobile-login-dots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+              <pattern id="mobile-dots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
                 <circle cx="2" cy="2" r="1.5" fill="#00A86B" />
               </pattern>
-              <rect width="70" height="70" fill="url(#mobile-login-dots)" />
+              <rect width="70" height="70" fill="url(#mobile-dots)" />
             </svg>
           </div>
 
@@ -178,110 +309,323 @@ const Login = () => {
           </Link>
         </div>
 
-        <div className="max-w-lg w-full mx-auto my-auto space-y-8 py-6 relative z-10">
+        <div className="max-w-lg w-full mx-auto my-auto space-y-6 py-6 relative z-10">
           
-          {/* Header Copy */}
-          <div className="space-y-2">
-            <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
-              Welcome Back!
-            </h1>
-            <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
-              Log in now to explore all the features and benefits of our platform and see what's new.
-            </p>
-          </div>
+          {/* ========================================================================= */}
+          {/* VIEW 1: STANDARD LOGIN FORM                                               */}
+          {/* ========================================================================= */}
+          {viewMode === "login" && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header Copy */}
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Welcome Back</span>
+                </div>
+                <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+                  Log In
+                </h1>
+                <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+                  Masuk ke akun SALDO Anda untuk mengelola keuangan dan melihat wawasan terbaru.
+                </p>
+              </div>
 
-          {/* Error Alert */}
-          {error && (
-            <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+              {/* Success Notification */}
+              {successMsg && (
+                <div className="flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3.5 rounded-2xl animate-fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">{successMsg}</p>
+                </div>
+              )}
+
+              {/* Error Alert */}
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+                </div>
+              )}
+
+              {/* Form Fields */}
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                
+                {/* Email Field Container */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Alamat Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@email.com"
+                    className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
+                  />
+                </div>
+
+                {/* Password Field Container */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Password
+                  </label>
+                  <div className="flex items-center justify-between mt-1">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Options Row */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#00A86B] focus:ring-[#00A86B] border-[#D1EADE] cursor-pointer"
+                    />
+                    <span>Ingat saya</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(email);
+                      setViewMode("forgot_email");
+                      setError("");
+                      setSuccessMsg("");
+                    }}
+                    className="text-xs font-bold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] dark:hover:text-[#00E592] transition-colors cursor-pointer"
+                  >
+                    Lupa Password?
+                  </button>
+                </div>
+
+                {/* Bottom Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-[#D1EADE]/50 dark:border-[#14382C]">
+                  <div>
+                    <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                      Belum punya akun?
+                    </p>
+                    <Link
+                      to="/register"
+                      className="text-xs font-black text-[#09261E] dark:text-white hover:text-[#00A86B] dark:hover:text-[#00A86B] transition-colors inline-flex items-center gap-0.5 mt-0.5"
+                    >
+                      <span>Daftar Sekarang</span>
+                      <span className="text-[#00A86B] tracking-tight">{'>>>'}</span>
+                    </Link>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-10 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center"
+                  >
+                    {loading ? "Masuk..." : "Login"}
+                  </button>
+                </div>
+
+              </form>
             </div>
           )}
 
-          {/* Form Fields */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            
-            {/* Email Field Container */}
-            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-4 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
-                Enter your email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="johndoe@mail.domain"
-                className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
-              />
-            </div>
-
-            {/* Password Field Container */}
-            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-4 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
-                Enter your Password
-              </label>
-              <div className="flex items-center justify-between mt-1">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Options Row */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#00A86B] focus:ring-[#00A86B] border-[#D1EADE] cursor-pointer"
-                />
-                <span>Remember my account</span>
-              </label>
-
-              <a href="#" className="text-xs font-semibold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] transition-colors">
-                Forgot Password?
-              </a>
-            </div>
-
-            {/* Bottom Row: Register link on Left & Login button on Right */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-[#D1EADE]/50 dark:border-[#14382C]">
-              <div>
-                <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
-                  Don't have an account?
-                </p>
-                <Link
-                  to="/register"
-                  className="text-xs font-black text-[#09261E] dark:text-white hover:text-[#00A86B] dark:hover:text-[#00A86B] transition-colors inline-flex items-center gap-0.5 mt-0.5"
-                >
-                  <span>Register Now</span>
-                  <span className="text-[#00A86B] tracking-tight">{'>>>'}</span>
-                </Link>
-              </div>
-
+          {/* ========================================================================= */}
+          {/* VIEW 2: FORGOT PASSWORD - STEP 1 (INPUT EMAIL)                            */}
+          {/* ========================================================================= */}
+          {viewMode === "forgot_email" && (
+            <div className="space-y-6 animate-fade-in">
               <button
-                type="submit"
-                disabled={loading}
-                className="px-10 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center"
+                type="button"
+                onClick={() => {
+                  setViewMode("login");
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] dark:hover:text-[#00E592] cursor-pointer transition-colors"
               >
-                {loading ? "Logging in..." : "Login"}
+                <ArrowLeft className="w-4 h-4" />
+                <span>Kembali ke Login</span>
               </button>
-            </div>
 
-          </form>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/15 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Reset Password</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+                  Lupa Password?
+                </h1>
+                <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+                  Masukkan email terdaftar Anda. Kami akan mengirimkan 6-digit kode OTP untuk mereset password akun Anda.
+                </p>
+              </div>
+
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSendForgotOtp} className="space-y-4">
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Email Terdaftar
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="nama@email.com"
+                    className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || !forgotEmail}
+                  className="w-full py-4 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 flex items-center justify-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span>{loading ? "Mengirim Kode..." : "Kirim Kode Reset Password"}</span>
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* VIEW 3: FORGOT PASSWORD - STEP 2 (OTP + NEW PASSWORD)                     */}
+          {/* ========================================================================= */}
+          {viewMode === "forgot_otp" && (
+            <div className="space-y-6 animate-fade-in">
+              <button
+                type="button"
+                onClick={() => {
+                  setViewMode("forgot_email");
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] dark:hover:text-[#00E592] cursor-pointer transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Ganti Email Reset</span>
+              </button>
+
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/15 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Verifikasi & Password Baru</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+                  Buat Password Baru
+                </h1>
+                <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+                  Masukkan 6-digit kode OTP dari email{" "}
+                  <span className="font-bold text-[#09261E] dark:text-white underline decoration-[#00A86B]">{forgotEmail}</span>{" "}
+                  beserta password baru Anda.
+                </p>
+              </div>
+
+              {/* Success Notification */}
+              {successMsg && (
+                <div className="flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3.5 rounded-2xl animate-fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">{successMsg}</p>
+                </div>
+              )}
+
+              {/* Error Alert */}
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyAndResetPassword} className="space-y-4">
+                
+                {/* 6 Digit OTP Input */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Kode OTP Reset 6-Digit
+                  </label>
+                  <OtpInput
+                    length={6}
+                    value={forgotOtp}
+                    onChange={setForgotOtp}
+                    onResend={handleResendForgotOtp}
+                    resendLoading={resendLoading}
+                    resendCooldown={60}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* New Password Field */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Password Baru
+                  </label>
+                  <div className="flex items-center justify-between mt-1">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimal 6 karakter"
+                      className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
+                    >
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm New Password Field */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Konfirmasi Password Baru
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Ketik ulang password baru"
+                    className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || forgotOtp.length < 6 || !newPassword}
+                  className="w-full py-4 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-xl shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 flex items-center justify-center gap-2 mt-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{loading ? "Menyimpan Password Baru..." : "Simpan Password Baru"}</span>
+                </button>
+              </form>
+            </div>
+          )}
 
         </div>
 

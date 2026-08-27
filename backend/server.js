@@ -22,6 +22,7 @@ import categoryRoutes from "./routes/categories.js";
 import transactionRoutes from "./routes/transactions.js";
 import statsRoutes from "./routes/stats.js";
 import captureRoutes from "./routes/capture.js";
+import otpRoutes from "./routes/otp.js";
 
 // Bypass ISP DNS for MongoDB SRV when running on local machine (not on Vercel)
 if (!process.env.VERCEL) {
@@ -58,6 +59,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/capture", captureRoutes);
+app.use("/api/otp", otpRoutes);
 
 // Root / Health check route
 app.get("/", (req, res) => {

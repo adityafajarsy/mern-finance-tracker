@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, CheckCircle2, ArrowLeft, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import OtpInput from "../components/ui/OtpInput";
 import hpHeroImage from "../assets/hp_hero.webp";
 
 const Register = () => {
@@ -9,9 +10,16 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // OTP Verification state
+  const [step, setStep] = useState("form"); // "form" | "otp"
+  const [otpCode, setOtpCode] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const { register, user } = useAuth();
   const navigate = useNavigate();
@@ -23,16 +31,116 @@ const Register = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Step 1: Send Signup OTP
+  const handleSendSignupOtp = async (e) => {
+    if (e) e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
-      await register(username, email, password);
+      const res = await fetch("/api/otp/send-signup-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal mengirim kode verifikasi");
+      }
+
+      setSuccessMsg(data.message || `Kode verifikasi telah dikirim ke ${email}`);
+      setStep("otp");
+      setOtpCode("");
+    } catch (err) {
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = async () => {
+    setError("");
+    setSuccessMsg("");
+    setResendLoading(true);
+
+    try {
+      const res = await fetch("/api/otp/send-signup-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal mengirim ulang kode");
+      }
+
+      setSuccessMsg(`Kode baru berhasil dikirim ke ${email}`);
+    } catch (err) {
+      setError(err.message || "Gagal mengirim ulang kode");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Step 2: Verify OTP & Finalize Registration
+  const handleVerifyAndRegister = async (e) => {
+    e.preventDefault();
+    if (otpCode.length < 6) {
+      setError("Masukkan 6-digit kode OTP lengkap");
+      return;
+    }
+
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      // 1. Verify OTP with backend
+      const verifyRes = await fetch("/api/otp/verify-signup-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          otp: otpCode.trim(),
+        }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.message || "Kode OTP tidak valid");
+      }
+
+      // 2. Official user registration
+      await register(username.trim(), email.trim().toLowerCase(), password);
+
+      // 3. Mark user as emailVerified
+      try {
+        await fetch("/api/otp/mark-verified", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        });
+      } catch (err) {
+        // Non-blocking
+        console.warn("Failed to mark email verified:", err);
+      }
+
+      // 4. Instant navigation to Dashboard
       navigate("/app");
     } catch (err) {
-      setError(err.message || "Registration failed. Please try again.");
+      setError(err.message || "Verifikasi atau registrasi gagal. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -117,17 +225,18 @@ const Register = () => {
 
         {/* Bottom Statement */}
         <div className="relative z-10 space-y-0.5">
-          <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00A86B]">
-            Get Started Free
+          <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00A86B] flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Email OTP Verified Security</span>
           </p>
           <p className="text-xs font-medium text-[#B7DFCD]">
-            Say what happened. SALDO handles the rest.
+            Akun Anda dilindungi dengan autentikasi email terverifikasi.
           </p>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* RIGHT PANEL: 100% Height Full-Screen Editorial Register Form              */}
+      {/* RIGHT PANEL: 100% Height Full-Screen Editorial Register / OTP Form        */}
       {/* ========================================================================= */}
       <div className="col-span-1 md:col-span-7 lg:col-span-7 p-6 sm:p-12 lg:p-16 flex flex-col justify-between h-full overflow-y-auto bg-white dark:bg-[#071913] relative">
         
@@ -179,122 +288,214 @@ const Register = () => {
           </Link>
         </div>
 
-        <div className="max-w-lg w-full mx-auto my-auto space-y-7 py-6 relative z-10">
+        <div className="max-w-lg w-full mx-auto my-auto space-y-6 py-6 relative z-10">
           
-          {/* Header Copy */}
-          <div className="space-y-2">
-            <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
-              Create Account
-            </h1>
-            <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
-              Join SALDO today to track your spending without spreadsheets and understand what's next.
-            </p>
-          </div>
+          {/* ========================================================================= */}
+          {/* STEP 1: INITIAL REGISTRATION FORM (INPUT NAME, EMAIL, PASSWORD)            */}
+          {/* ========================================================================= */}
+          {step === "form" && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header Copy */}
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Registrasi Cepat & Aman</span>
+                </div>
+                <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+                  Create Account
+                </h1>
+                <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+                  Bergabunglah dengan SALDO untuk memantau keuangan cerdas dengan verifikasi email resmi.
+                </p>
+              </div>
 
-          {/* Error Alert */}
-          {error && (
-            <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+              {/* Error Alert */}
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+                </div>
+              )}
+
+              {/* Form Fields */}
+              <form onSubmit={handleSendSignupOtp} className="space-y-4">
+                
+                {/* Username Field Container */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Nama / Username Anda
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Aditya Fajar"
+                    className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
+                  />
+                </div>
+
+                {/* Email Field Container */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Alamat Email (Untuk Pengiriman OTP)
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@email.com"
+                    className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
+                  />
+                </div>
+
+                {/* Password Field Container */}
+                <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
+                    Buat Password
+                  </label>
+                  <div className="flex items-center justify-between mt-1">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Minimal 6 karakter"
+                      className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Terms Agreement */}
+                <div className="pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                    <input
+                      type="checkbox"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      required
+                      className="w-4 h-4 rounded text-[#00A86B] focus:ring-[#00A86B] border-[#D1EADE] cursor-pointer"
+                    />
+                    <span>Saya menyetujui Ketentuan Layanan & Kebijakan Privasi</span>
+                  </label>
+                </div>
+
+                {/* Bottom Action Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-[#D1EADE]/50 dark:border-[#14382C]">
+                  <div>
+                    <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
+                      Sudah punya akun?
+                    </p>
+                    <Link
+                      to="/login"
+                      className="text-xs font-black text-[#09261E] dark:text-white hover:text-[#00A86B] dark:hover:text-[#00A86B] transition-colors inline-flex items-center gap-0.5 mt-0.5"
+                    >
+                      <span>Login Sekarang</span>
+                      <span className="text-[#00A86B] tracking-tight">{'>>>'}</span>
+                    </Link>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !agreeTerms}
+                    className="px-8 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center flex items-center justify-center gap-2"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>{loading ? "Mengirim Kode..." : "Daftar & Kirim Kode"}</span>
+                  </button>
+                </div>
+
+              </form>
             </div>
           )}
 
-          {/* Form Fields */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Username Field Container */}
-            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
-                Your Name / Username
-              </label>
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Aditya"
-                className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
-              />
-            </div>
-
-            {/* Email Field Container */}
-            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
-                Enter your email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="johndoe@mail.domain"
-                className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none mt-1"
-              />
-            </div>
-
-            {/* Password Field Container */}
-            <div className="bg-[#F8FAF9] dark:bg-[#09261E]/50 border border-[#D1EADE]/70 dark:border-[#14382C] rounded-2xl p-3.5 focus-within:border-[#00A86B] focus-within:ring-1 focus-within:ring-[#00A86B] transition-all relative">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">
-                Create a Password
-              </label>
-              <div className="flex items-center justify-between mt-1">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-transparent text-sm font-bold text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="p-1 text-zinc-400 hover:text-[#09261E] dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Terms Agreement */}
-            <div className="pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
-                <input
-                  type="checkbox"
-                  checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
-                  required
-                  className="w-4 h-4 rounded text-[#00A86B] focus:ring-[#00A86B] border-[#D1EADE] cursor-pointer"
-                />
-                <span>I agree to the Terms of Service & Privacy Policy</span>
-              </label>
-            </div>
-
-            {/* Bottom Row: Login link on Left & Register button on Right */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-[#D1EADE]/50 dark:border-[#14382C]">
-              <div>
-                <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
-                  Already have an account?
-                </p>
-                <Link
-                  to="/login"
-                  className="text-xs font-black text-[#09261E] dark:text-white hover:text-[#00A86B] dark:hover:text-[#00A86B] transition-colors inline-flex items-center gap-0.5 mt-0.5"
-                >
-                  <span>Login Now</span>
-                  <span className="text-[#00A86B] tracking-tight">{'>>>'}</span>
-                </Link>
-              </div>
-
+          {/* ========================================================================= */}
+          {/* STEP 2: 6-DIGIT EMAIL OTP VERIFICATION FORM                               */}
+          {/* ========================================================================= */}
+          {step === "otp" && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Back to form button */}
               <button
-                type="submit"
-                disabled={loading}
-                className="px-10 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center"
+                type="button"
+                onClick={() => {
+                  setStep("form");
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1C5F4D] dark:text-[#88C8AC] hover:text-[#00A86B] dark:hover:text-[#00E592] cursor-pointer transition-colors"
               >
-                {loading ? "Creating..." : "Sign Up"}
+                <ArrowLeft className="w-4 h-4" />
+                <span>Ubah Data / Ganti Email</span>
               </button>
-            </div>
 
-          </form>
+              {/* Header Copy */}
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/15 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Verifikasi Email 2FA</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
+                  Masukkan Kode OTP
+                </h1>
+                <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
+                  Kami telah mengirimkan 6-digit kode OTP ke{" "}
+                  <span className="font-bold text-[#09261E] dark:text-white underline decoration-[#00A86B]">{email}</span>.
+                  Kode berlaku selama 5 menit.
+                </p>
+              </div>
+
+              {/* Success Notification */}
+              {successMsg && (
+                <div className="flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3.5 rounded-2xl animate-fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">{successMsg}</p>
+                </div>
+              )}
+
+              {/* Error Alert */}
+              {error && (
+                <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 p-3.5 rounded-2xl animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold">{error}</p>
+                </div>
+              )}
+
+              {/* OTP Form */}
+              <form onSubmit={handleVerifyAndRegister} className="space-y-6">
+                
+                {/* 6 Digit Auto-focus Input */}
+                <OtpInput
+                  length={6}
+                  value={otpCode}
+                  onChange={setOtpCode}
+                  onResend={handleResendOtp}
+                  resendLoading={resendLoading}
+                  resendCooldown={60}
+                  disabled={loading}
+                />
+
+                {/* Submit Verification Button */}
+                <button
+                  type="submit"
+                  disabled={loading || otpCode.length < 6}
+                  className="w-full py-4 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-xl shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{loading ? "Memverifikasi & Membuat Akun..." : "Verifikasi & Buat Akun"}</span>
+                </button>
+
+              </form>
+            </div>
+          )}
 
         </div>
 
