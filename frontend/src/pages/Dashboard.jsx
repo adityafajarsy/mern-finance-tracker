@@ -25,8 +25,11 @@ import {
   ArrowLeftRight,
   X,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Mic,
+  MicOff
 } from "lucide-react";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 const Dashboard = () => {
   const { authFetch, user, updateProfile, logout, handleResponse } = useAuth();
@@ -56,6 +59,24 @@ const Dashboard = () => {
   const [typewriterText, setTypewriterText] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Speech Recognition for Voice Capture
+  const {
+    isListening: isFloatingListening,
+    toggleListening: toggleFloatingListening,
+    isSupported: isSpeechSupported,
+    error: speechError,
+  } = useSpeechRecognition({
+    lang: "id-ID",
+    onResult: (text) => {
+      setFloatingInput(text);
+    },
+    onFinalResult: (finalText) => {
+      if (finalText.trim()) {
+        setFloatingInput(finalText.trim());
+      }
+    },
+  });
 
   useEffect(() => {
     const currentPhrase = placeholderPhrases[phraseIndex];
@@ -498,21 +519,59 @@ const Dashboard = () => {
       <div className="fixed bottom-22 md:bottom-8 left-1/2 -translate-x-1/2 md:left-[calc(50%+7rem)] 2xl:left-[calc(50%+8rem)] w-[92%] max-w-md md:max-w-lg 2xl:max-w-xl z-30 pointer-events-auto">
         <form
           onSubmit={handleFloatingSubmit}
-          className="bg-white/95 dark:bg-[#09261E]/95 backdrop-blur-xl border border-[#00A86B]/40 dark:border-[#00A86B]/30 rounded-full shadow-2xl shadow-[#00A86B]/20 p-1.5 pl-3.5 sm:pl-4 flex items-center gap-2.5 transition-all hover:border-[#00A86B]/80 focus-within:border-[#00A86B] focus-within:ring-2 focus-within:ring-[#00A86B]/25 group"
+          className={`bg-white/95 dark:bg-[#09261E]/95 backdrop-blur-xl border ${
+            isFloatingListening
+              ? "border-rose-500 ring-2 ring-rose-500/30 shadow-rose-500/25 animate-pulse"
+              : "border-[#00A86B]/40 dark:border-[#00A86B]/30 shadow-[#00A86B]/20 hover:border-[#00A86B]/80 focus-within:border-[#00A86B] focus-within:ring-2 focus-within:ring-[#00A86B]/25"
+          } rounded-full shadow-2xl p-1.5 pl-3.5 sm:pl-4 flex items-center gap-2.5 transition-all group`}
         >
-          {/* Animated AI Sparkle Indicator with Pulse Glow */}
-          <div className="w-7 h-7 rounded-full bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center shrink-0">
-            <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#00A86B]" />
-          </div>
+          {/* Animated AI Sparkle Indicator / Live Recording Waves */}
+          {isFloatingListening ? (
+            <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 animate-ping">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            </div>
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center shrink-0">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#00A86B]" />
+            </div>
+          )}
 
           {/* Input field with typewriter animated placeholder */}
           <input
             type="text"
             value={floatingInput}
             onChange={(e) => setFloatingInput(e.target.value)}
-            placeholder={typewriterText || "Tell SALDO what happened..."}
-            className="flex-1 bg-transparent text-xs sm:text-sm font-semibold text-[#09261E] dark:text-white placeholder:text-[#1C5F4D]/60 dark:placeholder:text-[#88C8AC]/60 focus:outline-none min-w-0"
+            placeholder={
+              isFloatingListening
+                ? "🎙️ Mendengarkan suara Anda... (Bicaralah sekarang)"
+                : (typewriterText || "Tell SALDO what happened...")
+            }
+            className={`flex-1 bg-transparent text-xs sm:text-sm font-semibold ${
+              isFloatingListening
+                ? "text-rose-600 dark:text-rose-400 placeholder:text-rose-500 font-bold"
+                : "text-[#09261E] dark:text-white placeholder:text-[#1C5F4D]/60 dark:placeholder:text-[#88C8AC]/60"
+            } focus:outline-none min-w-0`}
           />
+
+          {/* Voice Input Mic Button */}
+          {isSpeechSupported && (
+            <button
+              type="button"
+              onClick={toggleFloatingListening}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                isFloatingListening
+                  ? "bg-rose-500 text-white animate-pulse shadow-md shadow-rose-500/30 ring-2 ring-rose-400"
+                  : "bg-[#00A86B]/10 hover:bg-[#00A86B]/20 text-[#00A86B] dark:text-[#00E592]"
+              }`}
+              title={isFloatingListening ? "Stop Voice Input" : "Bicara dengan Suara (Voice Input)"}
+            >
+              {isFloatingListening ? (
+                <MicOff className="w-4 h-4" />
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </button>
+          )}
 
           {/* Quick Submit Arrow Button */}
           <button

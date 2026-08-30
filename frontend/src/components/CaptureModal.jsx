@@ -9,8 +9,11 @@ import {
   ArrowLeftRight, 
   HelpCircle, 
   SlidersHorizontal,
-  Calendar
+  Calendar,
+  Mic,
+  MicOff
 } from "lucide-react";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 const CaptureModal = ({
   isOpen,
@@ -42,6 +45,24 @@ const CaptureModal = ({
   const [saveError, setSaveError] = useState("");
 
   const inputRef = useRef(null);
+
+  // Speech Recognition for Voice Input inside Modal
+  const {
+    isListening: isModalListening,
+    toggleListening: toggleModalListening,
+    isSupported: isSpeechSupported,
+    error: speechError,
+  } = useSpeechRecognition({
+    lang: "id-ID",
+    onResult: (text) => {
+      setInputText(text);
+    },
+    onFinalResult: (finalText) => {
+      if (finalText.trim()) {
+        setInputText(finalText.trim());
+      }
+    },
+  });
 
   const interpretText = async (textToInterpret) => {
     if (!textToInterpret || !textToInterpret.trim()) return;
@@ -299,7 +320,13 @@ const CaptureModal = ({
           {!isManualMode && (
             <div className="space-y-2.5">
               <form onSubmit={handleInterpret} className="relative">
-                <div className="relative flex flex-col bg-[#F4FAF6] dark:bg-[#08241B]/70 border border-[#D1E8DD] dark:border-[#14382C] rounded-2xl p-2.5 focus-within:ring-2 focus-within:ring-[#00A86B] focus-within:border-transparent transition-all">
+                <div
+                  className={`relative flex flex-col bg-[#F4FAF6] dark:bg-[#08241B]/70 border ${
+                    isModalListening
+                      ? "border-rose-500 ring-2 ring-rose-500/30 shadow-rose-500/20 animate-pulse"
+                      : "border-[#D1E8DD] dark:border-[#14382C] focus-within:ring-2 focus-within:ring-[#00A86B] focus-within:border-transparent"
+                  } rounded-2xl p-2.5 transition-all`}
+                >
                   <textarea
                     ref={inputRef}
                     value={inputText}
@@ -311,8 +338,16 @@ const CaptureModal = ({
                       }
                     }}
                     rows={2}
-                    placeholder="e.g. 'gua abis beli cilok 5k' or 'gaji masuk 8jt' or 'transfer 100k BCA ke GoPay'..."
-                    className="w-full bg-transparent text-xs text-[#08241B] dark:text-white placeholder:text-zinc-400 focus:outline-none font-medium resize-none"
+                    placeholder={
+                      isModalListening
+                        ? "🎙️ Mendengarkan suara Anda... (Bicaralah sekarang)"
+                        : "e.g. 'gua abis beli cilok 5k' or 'gaji masuk 8jt' or 'transfer 100k BCA ke GoPay'..."
+                    }
+                    className={`w-full bg-transparent text-xs ${
+                      isModalListening
+                        ? "text-rose-600 dark:text-rose-400 placeholder:text-rose-500 font-bold"
+                        : "text-[#08241B] dark:text-white placeholder:text-zinc-400"
+                    } focus:outline-none font-medium resize-none`}
                   />
 
                   <div className="flex items-center justify-between pt-1 border-t border-[#D1E8DD]/60 dark:border-[#14382C] mt-1">
@@ -320,23 +355,44 @@ const CaptureModal = ({
                       Press <kbd className="px-1 py-0.2 bg-white dark:bg-[#0D261E] rounded border border-[#D1E8DD] dark:border-[#14382C] text-[8px] font-mono">Enter</kbd> to interpret
                     </span>
 
-                    <button
-                      type="submit"
-                      disabled={isInterpreting || !inputText.trim()}
-                      className="px-3 py-1.5 bg-[#00A86B] hover:bg-[#00935D] disabled:opacity-50 text-white rounded-xl text-[11px] font-bold shadow-md shadow-[#00A86B]/20 transition-all flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
-                    >
-                      {isInterpreting ? (
-                        <>
-                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Interpreting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Interpret</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </>
+                    <div className="flex items-center gap-1.5">
+                      {/* Voice Mic Button in Modal */}
+                      {isSpeechSupported && (
+                        <button
+                          type="button"
+                          onClick={toggleModalListening}
+                          className={`p-1.5 rounded-xl flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
+                            isModalListening
+                              ? "bg-rose-500 text-white animate-pulse shadow-md shadow-rose-500/30 ring-2 ring-rose-300"
+                              : "bg-[#00A86B]/10 hover:bg-[#00A86B]/20 text-[#00A86B] dark:text-[#00E592]"
+                          }`}
+                          title={isModalListening ? "Stop Voice Input" : "Bicara dengan Suara (Voice Input)"}
+                        >
+                          {isModalListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                          <span className="hidden sm:inline text-[10px]">
+                            {isModalListening ? "Mendengarkan..." : "Suara"}
+                          </span>
+                        </button>
                       )}
-                    </button>
+
+                      <button
+                        type="submit"
+                        disabled={isInterpreting || !inputText.trim()}
+                        className="px-3 py-1.5 bg-[#00A86B] hover:bg-[#00935D] disabled:opacity-50 text-white rounded-xl text-[11px] font-bold shadow-md shadow-[#00A86B]/20 transition-all flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {isInterpreting ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Interpreting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Interpret</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </form>
