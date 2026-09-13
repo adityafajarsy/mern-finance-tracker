@@ -1,4 +1,5 @@
 import hpHeroImage from "../assets/hp_hero.webp";
+import HeroDemoCard from "./HeroDemoCard";
 
 export const HeroProductVisual = ({ className = "" }) => {
   return (
@@ -15,6 +16,9 @@ export const HeroProductVisual = ({ className = "" }) => {
           alt="SALDO Mobile App Preview"
           className="w-full h-auto max-h-125 2xl:max-h-170 object-contain drop-shadow-[0_25px_40px_rgba(8,36,27,0.22)] transform hover:scale-[1.02] transition-transform duration-500 ease-out pointer-events-none select-none"
         />
+
+        {/* Floating Animated Demo Card (Desktop & Tablet only) */}
+        <HeroDemoCard className="hidden md:block absolute -right-6 sm:-right-8 lg:-right-14 2xl:-right-20 bottom-10 lg:bottom-16 z-20" />
       </div>
 
     </div>
