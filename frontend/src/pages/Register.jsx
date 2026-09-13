@@ -227,10 +227,10 @@ const Register = () => {
         <div className="relative z-10 space-y-0.5">
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00A86B] flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Email OTP Verified Security</span>
+            <span>Aman Lewat Verifikasi Email OTP</span>
           </p>
           <p className="text-xs font-medium text-[#B7DFCD]">
-            Akun Anda dilindungi dengan autentikasi email terverifikasi.
+            Akun kamu terlindungi dengan verifikasi email sebelum bisa masuk.
           </p>
         </div>
       </div>
@@ -299,13 +299,13 @@ const Register = () => {
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Registrasi Cepat & Aman</span>
+                  <span>Gratis & Gampang Banget</span>
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
-                  Create Account
+                  Buat Akun Gratis
                 </h1>
                 <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
-                  Bergabunglah dengan SALDO untuk memantau keuangan cerdas dengan verifikasi email resmi.
+                  Daftar di SALDO dan mulai catat keuanganmu dengan simpel — ketik atau ngomong, beres dalam detik.
                 </p>
               </div>
 
@@ -501,7 +501,7 @@ const Register = () => {
 
         {/* Footer info */}
         <div className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC] text-center pt-4">
-          © {new Date().getFullYear()} SALDO. All rights reserved.
+          © {new Date().getFullYear()} SALDO. Hak cipta dilindungi.
         </div>
 
       </div>

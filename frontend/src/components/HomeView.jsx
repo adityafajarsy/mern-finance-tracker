@@ -51,9 +51,9 @@ const HomeView = ({
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return "Selamat pagi";
+    if (hour < 17) return "Selamat siang";
+    return "Selamat malam";
   };
 
   // Group transactions by Date label (Hari Ini, Kemarin, Tanggal)
@@ -83,9 +83,9 @@ const HomeView = ({
 
       let label = dateObj.toLocaleDateString("id-ID", { day: "numeric", month: "long" }).toUpperCase();
       if (cleanDate === todayStr) {
-        label = "TODAY";
+        label = "HARI INI";
       } else if (cleanDate === yesterdayStr) {
-        label = "YESTERDAY";
+        label = "KEMARIN";
       }
 
       if (!groups[label]) groups[label] = [];
@@ -128,7 +128,7 @@ const HomeView = ({
           {/* Balance Display */}
           <div className="relative z-10 space-y-1 pt-4 sm:pt-6 pb-1">
             <p className="text-xs font-semibold text-[#1C5F4D] dark:text-[#88C8AC] tracking-wide">
-              Available balance
+              Saldo Total
             </p>
 
             <h1 className="text-4xl sm:text-5xl font-black font-display tracking-tight text-[#08241B] dark:text-white tabular-nums leading-tight whitespace-nowrap overflow-x-auto no-scrollbar">
@@ -145,7 +145,7 @@ const HomeView = ({
               <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-[#00A86B]/20 transition-colors">
                 <Sparkles className="w-4 h-4 text-[#00A86B]" />
               </div>
-              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Capture</span>
+              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Catat</span>
             </button>
 
             <button
@@ -165,7 +165,7 @@ const HomeView = ({
               <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-[#00A86B]/20 transition-colors">
                 <BarChart3 className="w-4 h-4 text-[#00A86B]" />
               </div>
-              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Insights</span>
+              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Analitik</span>
             </button>
 
             <button
@@ -175,7 +175,7 @@ const HomeView = ({
               <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-[#00A86B]/20 transition-colors">
                 <Landmark className="w-4 h-4 text-emerald-400" />
               </div>
-              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Accounts</span>
+              <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Rekening</span>
             </button>
           </div>
         </section>
@@ -190,13 +190,13 @@ const HomeView = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-black font-display text-[#09261E] dark:text-white">
-                Recent Activity
+                Aktivitas Terbaru
               </h2>
               <button
                 onClick={onOpenLedger}
                 className="text-xs font-bold text-[#00A86B] hover:underline cursor-pointer flex items-center gap-1"
               >
-                <span>View all</span>
+                <span>Lihat semua</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -209,7 +209,7 @@ const HomeView = ({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search transactions..."
+                  placeholder="Cari transaksi..."
                   className="w-full pl-8 pr-3 py-1.5 bg-[#F4FAF6] dark:bg-[#071913] border border-[#D1EADE]/80 dark:border-[#14382C] rounded-xl text-xs font-medium text-[#09261E] dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-[#00A86B]"
                 />
               </div>
@@ -226,7 +226,7 @@ const HomeView = ({
           {/* Activity List */}
           {Object.keys(groupedRecent).length === 0 ? (
             <div className="py-12 text-center text-xs text-[#1C5F4D] dark:text-[#88C8AC]">
-              No transactions found. Capture your first transaction with the button below!
+              Belum ada transaksi. Yuk, catat transaksi pertamamu sekarang!
             </div>
           ) : (
             <div className="space-y-4 pt-1">
@@ -264,7 +264,7 @@ const HomeView = ({
                             <p className="text-xs font-bold text-[#08241B] dark:text-white truncate">
                               {tx.type === "Transfer"
                                 ? `${tx.account?.name} → ${tx.destinationAccount?.name}`
-                                : tx.description || tx.category?.name || "Transaction"}
+                                : tx.description || tx.category?.name || "Transaksi"}
                             </p>
                             <p className="text-[10px] text-[#1C5F4D] dark:text-[#88C8AC] mt-0.5 truncate">
                               {tx.category?.name ? `${tx.category.name} · ` : ""}
@@ -314,7 +314,7 @@ const HomeView = ({
             </p>
 
             <p className="text-xs font-medium text-[#1C5F4D] dark:text-[#88C8AC]">
-              You currently have
+              Saldo kamu saat ini
             </p>
 
             <h1 className="text-5xl font-black font-display tracking-tight text-[#08241B] dark:text-white tabular-nums">
@@ -322,13 +322,13 @@ const HomeView = ({
             </h1>
 
             <div className="flex items-center gap-2 pt-0.5 text-xs text-[#1C5F4D] dark:text-[#88C8AC]">
-              <span>Across {accounts.length} registered {accounts.length === 1 ? "account" : "accounts"}</span>
+              <span>Di {accounts.length} {accounts.length === 1 ? "rekening" : "rekening"} terdaftar</span>
               <span>·</span>
               <button
                 onClick={() => onSetActiveTab("accounts")}
                 className="text-[#00A86B] font-bold hover:underline cursor-pointer flex items-center gap-0.5"
               >
-                <span>View breakdown</span>
+                <span>Lihat rincian</span>
                 <ArrowRight className="w-3 h-3 inline" />
               </button>
             </div>
@@ -346,12 +346,12 @@ const HomeView = ({
                 <Sparkles className="w-3.5 h-3.5" />
               </span>
               <p className="text-xs font-bold text-[#09261E] dark:text-white truncate">
-                {recommendation?.title || `You saved ${savingsRate}% of your income this month`}
+                {recommendation?.title || `Kamu berhasil menabung ${savingsRate}% dari pendapatan bulan ini`}
               </p>
             </div>
 
             <div className="flex items-center gap-1 text-[11px] font-bold text-[#00A86B] shrink-0">
-              <span>View Insights</span>
+              <span>Lihat Analitik</span>
               <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </button>
@@ -360,38 +360,38 @@ const HomeView = ({
         {/* 3. Monthly Snapshot */}
         <section className="bg-white/80 dark:bg-[#09261E]/80 border border-[#D1EADE] dark:border-[#14382C] rounded-2xl p-4 shadow-2xs space-y-3">
           <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
-            <span>This Month</span>
-            <span>{new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+            <span>Bulan Ini</span>
+            <span>{new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}</span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 divide-x divide-[#D1EADE]/70 dark:divide-[#14382C]">
             <div className="space-y-0.5 pr-2">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">Income</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">Pemasukan</span>
               <p className="text-base font-black font-display text-[#08241B] dark:text-white tabular-nums truncate">
                 {formatCurrency(currentMonthData.income)}
               </p>
               <p className="text-[9px] text-[#1C5F4D] dark:text-[#88C8AC] truncate">
-                {currentMonthData.incomeShift >= 0 ? "↑" : "↓"} {Math.abs(currentMonthData.incomeShift || 0)}% vs last mo
+                {currentMonthData.incomeShift >= 0 ? "↑" : "↓"} {Math.abs(currentMonthData.incomeShift || 0)}% vs bln lalu
               </p>
             </div>
 
             <div className="space-y-0.5 px-2">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">Spent</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#1C5F4D] dark:text-[#88C8AC]">Pengeluaran</span>
               <p className="text-base font-black font-display text-[#08241B] dark:text-white tabular-nums truncate">
                 {formatCurrency(currentMonthData.expense)}
               </p>
               <p className="text-[9px] text-[#1C5F4D] dark:text-[#88C8AC] truncate">
-                {currentMonthData.expenseShift >= 0 ? "↑" : "↓"} {Math.abs(currentMonthData.expenseShift || 0)}% vs last mo
+                {currentMonthData.expenseShift >= 0 ? "↑" : "↓"} {Math.abs(currentMonthData.expenseShift || 0)}% vs bln lalu
               </p>
             </div>
 
             <div className="space-y-0.5 pl-2">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#00A86B]">Saved</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#00A86B]">Tabungan</span>
               <p className="text-base font-black font-display text-[#00A86B] tabular-nums truncate">
                 {formatCurrency(currentMonthData.netSavings)}
               </p>
               <p className="text-[9px] font-semibold text-[#00A86B] truncate">
-                {savingsRate}% savings
+                {savingsRate}% ditabung
               </p>
             </div>
           </div>
@@ -403,23 +403,23 @@ const HomeView = ({
             <div className="flex items-center justify-between text-[10px] font-mono text-[#88C8AC] relative z-10">
               <span className="font-extrabold uppercase tracking-widest text-[#00A86B] flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-[#00A86B]" />
-                Before Payday Forecast
+                Prediksi Sebelum Gajian
               </span>
               <span className="bg-white/10 px-2 py-0.5 rounded-full text-[9px]">
-                {forecast.daysRemaining} days left · Day {forecast.daysElapsed}/{forecast.daysInMonth}
+                {forecast.daysRemaining} hari lagi · Hari ke-{forecast.daysElapsed}/{forecast.daysInMonth}
               </span>
             </div>
 
             <div className="relative z-10 flex items-baseline justify-between gap-2">
               <div>
-                <p className="text-[10px] text-[#88C8AC] font-medium">Estimated month-end balance</p>
+                <p className="text-[10px] text-[#88C8AC] font-medium">Estimasi saldo akhir bulan</p>
                 <h3 className="text-3xl font-black font-display tracking-tight text-white tabular-nums">
                   {formatCurrency(forecast.estimatedEndOfMonthBalance)}
                 </h3>
               </div>
               <div className="text-right">
-                <span className="text-[9px] text-[#88C8AC] block">Daily burn pace</span>
-                <span className="text-xs font-bold font-mono text-white">{formatCurrency(forecast.dailyBurnRate)}/day</span>
+                <span className="text-[9px] text-[#88C8AC] block">Laju pengeluaran harian</span>
+                <span className="text-xs font-bold font-mono text-white">{formatCurrency(forecast.dailyBurnRate)}/hari</span>
               </div>
             </div>
 
@@ -428,7 +428,7 @@ const HomeView = ({
                 onClick={() => onSetActiveTab("insights")}
                 className="text-[#00A86B] hover:text-[#10B981] text-[11px] font-bold flex items-center gap-1 cursor-pointer"
               >
-                <span>See complete forecast projection</span>
+                <span>Lihat proyeksi lengkap</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -439,13 +439,13 @@ const HomeView = ({
         <section className="bg-white dark:bg-[#09261E] rounded-3xl border border-[#D1EADE] dark:border-[#14382C] p-5 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-sm font-black font-display text-[#09261E] dark:text-white uppercase tracking-wider">
-              Recent Activity
+              Aktivitas Terbaru
             </span>
             <button
               onClick={onOpenLedger}
               className="text-xs font-bold text-[#00A86B] hover:underline cursor-pointer flex items-center gap-1"
             >
-              <span>History</span>
+              <span>Riwayat</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>

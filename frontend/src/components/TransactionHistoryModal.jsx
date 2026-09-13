@@ -553,7 +553,7 @@ const TransactionHistoryModal = ({
                   disabled={isSavingEdit}
                   className="flex-1 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
                 >
-                  {isSavingEdit ? "Saving..." : "Save Changes"}
+                  {isSavingEdit ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
               </div>
             </form>

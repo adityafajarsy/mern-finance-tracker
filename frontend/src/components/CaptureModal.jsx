@@ -215,22 +215,22 @@ const CaptureModal = ({
 
     const cleanAmount = parseFloat(String(txAmount).replace(/\./g, ""));
     if (isNaN(cleanAmount) || cleanAmount <= 0) {
-      setSaveError("Please enter a valid amount greater than 0");
+      setSaveError("Masukkan nominal yang valid (lebih dari 0)");
       return;
     }
 
     if (!txAccountId) {
-      setSaveError("Please select an account");
+      setSaveError("Pilih rekening terlebih dahulu");
       return;
     }
 
     if (txType === "Transfer" && !txDestAccountId) {
-      setSaveError("Please select a destination account for transfer");
+      setSaveError("Pilih rekening tujuan untuk transfer");
       return;
     }
 
     if (txType !== "Transfer" && !txCategoryId) {
-      setSaveError("Please select a category");
+      setSaveError("Pilih kategori terlebih dahulu");
       return;
     }
 
@@ -263,7 +263,7 @@ const CaptureModal = ({
       await onSaveTransaction(payload);
       onClose();
     } catch (err) {
-      setSaveError(err.message || "Failed to save transaction. Please try again.");
+      setSaveError(err.message || "Gagal menyimpan transaksi. Coba lagi ya.");
     } finally {
       setIsSaving(false);
     }
@@ -659,7 +659,7 @@ const CaptureModal = ({
                   ) : (
                     <>
                       <Check className="w-3.5 h-3.5" />
-                      <span>Confirm & Save</span>
+                      <span>Simpan Transaksi</span>
                     </>
                   )}
                 </button>

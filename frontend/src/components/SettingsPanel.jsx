@@ -212,7 +212,7 @@ const SettingsPanel = ({ accounts = [], onOpenCategoriesModal }) => {
             disabled={saving}
             className="w-full py-2.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Preferences"}
+            {saving ? "Menyimpan..." : "Simpan Preferensi"}
           </button>
 
           <button

@@ -248,10 +248,10 @@ const Login = () => {
         {/* Bottom Statement */}
         <div className="relative z-10 space-y-0.5">
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#00A86B]">
-            Intelligent Finance
+            Asisten Keuangan Pribadi
           </p>
           <p className="text-xs font-medium text-[#B7DFCD]">
-            Your money, understood.
+            Duit kamu, makin jelas.
           </p>
         </div>
       </div>
@@ -320,13 +320,13 @@ const Login = () => {
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Welcome Back</span>
+                  <span>Halo, Selamat Datang Lagi!</span>
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
-                  Log In
+                  Masuk ke SALDO
                 </h1>
                 <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
-                  Masuk ke akun SALDO Anda untuk mengelola keuangan dan melihat wawasan terbaru.
+                  Yuk, lanjut pantau keuanganmu dan lihat gimana progress saldo kamu hari ini.
                 </p>
               </div>
 
@@ -434,7 +434,7 @@ const Login = () => {
                     disabled={loading}
                     className="px-10 py-3.5 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-2xl text-sm font-black shadow-lg shadow-[#00A86B]/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 self-stretch sm:self-auto text-center"
                   >
-                    {loading ? "Masuk..." : "Login"}
+                    {loading ? "Masuk..." : "Masuk Sekarang"}
                   </button>
                 </div>
 
@@ -631,7 +631,7 @@ const Login = () => {
 
         {/* Footer info */}
         <div className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC] text-center pt-4">
-          © {new Date().getFullYear()} SALDO. All rights reserved.
+          © {new Date().getFullYear()} SALDO. Hak cipta dilindungi.
         </div>
 
       </div>

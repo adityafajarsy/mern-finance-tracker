@@ -259,7 +259,7 @@ const CategoriesPanel = ({
                   type="submit"
                   className="flex-1 py-3 bg-violet-600 hover:bg-violet-755 text-white rounded-2xl text-sm font-bold shadow-lg shadow-violet-500/25 cursor-pointer transition-all duration-200"
                 >
-                  Save Category
+                  Simpan Kategori
                 </button>
               </div>
             </form>

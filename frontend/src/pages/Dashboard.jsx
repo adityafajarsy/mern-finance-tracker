@@ -212,17 +212,17 @@ const Dashboard = () => {
 
     const cleanAmt = parseFloat(String(transferAmount).replace(/\./g, ""));
     if (isNaN(cleanAmt) || cleanAmt <= 0) {
-      setTransferError("Please enter a valid transfer amount");
+      setTransferError("Masukkan nominal transfer yang valid");
       return;
     }
 
     if (!transferSource || !transferDest) {
-      setTransferError("Please select both source and destination accounts");
+      setTransferError("Pilih rekening asal dan tujuan transfer");
       return;
     }
 
     if (transferSource === transferDest) {
-      setTransferError("Source and destination accounts must be different");
+      setTransferError("Rekening asal dan tujuan tidak boleh sama");
       return;
     }
 
@@ -240,7 +240,7 @@ const Dashboard = () => {
       setTransferAmount("");
       setTransferDesc("Transfer Antar-Akun");
     } catch (err) {
-      setTransferError(err.message || "Failed to execute transfer");
+      setTransferError(err.message || "Gagal melakukan transfer");
     } finally {
       setTransferSaving(false);
     }
@@ -307,10 +307,10 @@ const Dashboard = () => {
   };
 
   const navItems = [
-    { id: "home", label: "Home", icon: <Home className="w-4 h-4" /> },
-    { id: "insights", label: "Insights", icon: <BarChart3 className="w-4 h-4" /> },
-    { id: "accounts", label: "Accounts", icon: <Landmark className="w-4 h-4" /> },
-    { id: "settings", label: "Settings", icon: <Settings className="w-4 h-4" /> },
+    { id: "home", label: "Beranda", icon: <Home className="w-4 h-4" /> },
+    { id: "insights", label: "Analitik", icon: <BarChart3 className="w-4 h-4" /> },
+    { id: "accounts", label: "Rekening", icon: <Landmark className="w-4 h-4" /> },
+    { id: "settings", label: "Pengaturan", icon: <Settings className="w-4 h-4" /> },
   ];
 
   const renderActivePanel = () => {
@@ -342,7 +342,7 @@ const Dashboard = () => {
                 setTransferDest(accounts[1]._id);
                 setShowTransferModal(true);
               } else {
-                alert("You need at least 2 accounts to make transfers.");
+                alert("Kamu butuh minimal 2 rekening untuk melakukan transfer.");
               }
             }}
             onSetActiveTab={setActiveTab}
@@ -377,7 +377,7 @@ const Dashboard = () => {
                 setTransferDest(accounts[1]._id);
                 setShowTransferModal(true);
               } else {
-                alert("You need at least 2 accounts to make transfers.");
+                alert("Kamu butuh minimal 2 rekening untuk melakukan transfer.");
               }
             }}
           />
@@ -448,7 +448,7 @@ const Dashboard = () => {
             className="w-full py-2.5 px-4 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-full text-xs font-bold shadow-sm shadow-[#00A86B]/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Capture</span>
+            <span>Catat Transaksi</span>
           </button>
 
           {/* Navigation Links */}
@@ -501,7 +501,7 @@ const Dashboard = () => {
             className="w-full flex items-center gap-2 px-2 py-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg text-xs font-bold transition-all cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
+            <span>Keluar</span>
           </button>
         </div>
       </aside>
@@ -544,7 +544,7 @@ const Dashboard = () => {
             placeholder={
               isFloatingListening
                 ? "🎙️ Mendengarkan suara Anda... (Bicaralah sekarang)"
-                : (typewriterText || "Tell SALDO what happened...")
+                : (typewriterText || "Ceritain ke SALDO apa yang terjadi...")
             }
             className={`flex-1 bg-transparent text-xs sm:text-sm font-semibold ${
               isFloatingListening
@@ -598,7 +598,7 @@ const Dashboard = () => {
             }`}
           >
             <Home className="w-4 h-4" />
-            <span className="text-[10px]">Home</span>
+            <span className="text-[10px]">Beranda</span>
           </button>
 
           <button
@@ -608,7 +608,7 @@ const Dashboard = () => {
             }`}
           >
             <BarChart3 className="w-4 h-4" />
-            <span className="text-[10px]">Insights</span>
+            <span className="text-[10px]">Analitik</span>
           </button>
 
           <button
@@ -618,7 +618,7 @@ const Dashboard = () => {
             }`}
           >
             <Landmark className="w-4 h-4" />
-            <span className="text-[10px]">Accounts</span>
+            <span className="text-[10px]">Rekening</span>
           </button>
 
           <button
@@ -628,7 +628,7 @@ const Dashboard = () => {
             }`}
           >
             <Settings className="w-4 h-4" />
-            <span className="text-[10px]">Settings</span>
+            <span className="text-[10px]">Pengaturan</span>
           </button>
         </div>
       </nav>
@@ -664,7 +664,7 @@ const Dashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
           <div className="w-full max-w-2xl bg-white dark:bg-[#09261E] rounded-2xl shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] flex flex-col">
             <div className="p-4 border-b border-[#D1EADE]/70 dark:border-[#14382C] flex justify-between items-center">
-              <h3 className="text-sm font-black text-[#09261E] dark:text-white font-display">Manage Category Tags</h3>
+              <h3 className="text-sm font-black text-[#09261E] dark:text-white font-display">Kelola Tag Kategori</h3>
               <button
                 onClick={() => setShowCategoriesModal(false)}
                 className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
@@ -694,7 +694,7 @@ const Dashboard = () => {
                   <ArrowLeftRight className="w-3.5 h-3.5" />
                 </div>
                 <h3 className="text-sm font-black text-[#09261E] dark:text-white font-display">
-                  Transfer Funds
+                  Transfer Dana
                 </h3>
               </div>
               <button
@@ -714,7 +714,7 @@ const Dashboard = () => {
             <form onSubmit={handleExecuteTransfer} className="space-y-3.5">
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
-                  From Account (Source)
+                  Dari Rekening (Asal)
                 </label>
                 <select
                   value={transferSource}
@@ -731,7 +731,7 @@ const Dashboard = () => {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
-                  To Account (Destination)
+                  Ke Rekening (Tujuan)
                 </label>
                 <select
                   value={transferDest}
@@ -748,7 +748,7 @@ const Dashboard = () => {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
-                  Amount (Rp)
+                  Nominal (Rp)
                 </label>
                 <input
                   type="text"
@@ -765,7 +765,7 @@ const Dashboard = () => {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#1C5F4D] dark:text-[#88C8AC] mb-1">
-                  Description
+                  Keterangan
                 </label>
                 <input
                   type="text"
@@ -782,14 +782,14 @@ const Dashboard = () => {
                   onClick={() => setShowTransferModal(false)}
                   className="flex-1 py-2 border border-[#D1EADE] dark:border-[#14382C] text-[#1C5F4D] dark:text-[#88C8AC] rounded-lg text-xs font-bold cursor-pointer"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
                   disabled={transferSaving}
                   className="flex-1 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
                 >
-                  {transferSaving ? "Transferring..." : "Execute Transfer"}
+                  {transferSaving ? "Memproses..." : "Eksekusi Transfer"}
                 </button>
               </div>
             </form>

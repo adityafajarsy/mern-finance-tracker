@@ -247,7 +247,7 @@ const ReportsPanel = ({
                 </h3>
                 {reportData.totalIncome > 0 && reportData.savings >= 0 && (
                   <p className="text-[8px] font-bold text-emerald-600 mt-0.5">
-                    Saved {Math.round((reportData.savings / reportData.totalIncome) * 100)}% of income
+                    Berhasil menabung {Math.round((reportData.savings / reportData.totalIncome) * 100)}% dari pemasukan
                   </p>
                 )}
               </div>

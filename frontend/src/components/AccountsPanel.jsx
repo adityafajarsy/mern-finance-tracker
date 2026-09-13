@@ -306,7 +306,7 @@ const AccountsPanel = ({
                   type="submit"
                   className="flex-1 py-2 bg-[#00A86B] hover:bg-[#00935D] text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer"
                 >
-                  {editAccount ? "Save Changes" : "Create Account"}
+                  {editAccount ? "Simpan Perubahan" : "Buat Rekening"}
                 </button>
               </div>
             </form>

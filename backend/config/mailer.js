@@ -35,8 +35,8 @@ export const sendOtpEmail = async ({ toEmail, otpCode, userName = "Sahabat SALDO
 
   const headerTitle = isSignup ? "Verifikasi Akun Baru" : "Reset Password Akun";
   const descriptionText = isSignup
-    ? "Terima kasih telah bergabung dengan SALDO. Gunakan 6-digit kode OTP di bawah ini untuk memverifikasi email dan menyelesaikan pendaftaran akun Anda:"
-    : "Kami menerima permintaan untuk mengatur ulang password akun SALDO Anda. Gunakan 6-digit kode OTP di bawah ini untuk melanjutkan reset password:";
+    ? `Hai ${userName}, makasih udah mau bergabung sama SALDO! Gunakan 6-digit kode OTP di bawah untuk verifikasi email dan selesaikan pendaftaran akunmu:`
+    : `Hai ${userName}, kami menerima permintaan reset password akun SALDO kamu. Gunakan 6-digit kode OTP di bawah untuk lanjutkan proses reset:`;
 
   // Always log OTP in terminal for instant dev verification
   console.log(`\n========================================`);
@@ -174,7 +174,7 @@ export const sendOtpEmail = async ({ toEmail, otpCode, userName = "Sahabat SALDO
       </div>
       <div class="content">
         <div class="badge">${headerTitle}</div>
-        <h1>Halo, ${userName}!</h1>
+        <h1>Halo, ${userName}! 👋</h1>
         <p>${descriptionText}</p>
         
         <div class="otp-box">
