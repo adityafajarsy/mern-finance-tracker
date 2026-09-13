@@ -42,19 +42,13 @@ export const OrganicFlowLine = ({ className = "" }) => {
 
         <g className="saldo-swirl-container-desk">
           <path
-            d="M -100 420 
-               C 60 520, 180 580, 320 580 
-               C 390 580, 425 510, 395 440 
-               C 370 370, 295 400, 315 490 
-               C 330 560, 400 580, 480 510 
-               C 620 400, 780 270, 940 180 
-               C 1010 135, 1090 145, 1070 250 
-               C 1050 350, 1120 450, 1220 420 
-               C 1290 390, 1360 270, 1315 180 
-               C 1270 95, 1180 140, 1210 280 
-               C 1235 390, 1380 290, 1720 100"
+            d="M -80 520 
+               C 140 480, 280 570, 480 600 
+               C 680 630, 860 550, 1020 440 
+               C 1160 340, 1300 330, 1420 400 
+               C 1520 460, 1620 500, 1720 470"
             stroke="#00A86B"
-            strokeWidth="24"
+            strokeWidth="22"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-desktop"
@@ -92,17 +86,12 @@ export const OrganicFlowLine = ({ className = "" }) => {
         <g className="saldo-swirl-container-tab">
           {/* Custom Proportional Curve for iPad Mini Aspect Ratio */}
           <path
-            d="M -60 480 
-               C 30 570, 110 610, 190 590 
-               C 250 570, 270 480, 220 430 
-               C 170 380, 130 450, 160 520 
-               C 190 570, 260 560, 360 470 
-               C 470 370, 560 250, 650 180 
-               C 720 120, 790 140, 770 240 
-               C 750 330, 680 370, 700 440 
-               C 720 500, 800 450, 960 210"
+            d="M -60 530 
+               C 80 500, 180 570, 320 590 
+               C 460 610, 580 530, 680 430 
+               C 760 350, 840 360, 960 440"
             stroke="#00A86B"
-            strokeWidth="18"
+            strokeWidth="16"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-tablet"

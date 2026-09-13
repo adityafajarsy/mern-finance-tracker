@@ -191,7 +191,7 @@ const LandingPage = () => {
 
       {/* 01 HERO */}
       <section className="pt-24 sm:pt-28 md:pt-32 2xl:pt-40 pb-12 md:pb-16 2xl:pb-24 px-4 sm:px-6 md:px-8 max-w-6xl 2xl:max-w-[1540px] mx-auto relative">
-        <div className="absolute top-[48%] -translate-y-1/2 left-1/2 -translate-x-1/2 w-screen min-w-[100vw] h-[850px] sm:h-[900px] md:h-[720px] lg:h-[760px] 2xl:h-[860px] pointer-events-none -z-0 overflow-visible flex items-center justify-center">
+        <div className="absolute top-[48%] md:top-[54%] lg:top-[56%] -translate-y-1/2 left-1/2 -translate-x-1/2 w-screen min-w-[100vw] h-[850px] sm:h-[900px] md:h-[720px] lg:h-[760px] 2xl:h-[860px] pointer-events-none -z-0 overflow-visible flex items-center justify-center">
           <OrganicFlowLine className="w-full h-full" />
         </div>
 
