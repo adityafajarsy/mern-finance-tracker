@@ -42,13 +42,15 @@ export const OrganicFlowLine = ({ className = "" }) => {
 
         <g className="saldo-swirl-container-desk">
           <path
-            d="M -80 520 
-               C 140 480, 280 570, 480 600 
-               C 680 630, 860 550, 1020 440 
-               C 1160 340, 1300 330, 1420 400 
-               C 1520 460, 1620 500, 1720 470"
+            d="M -80 620 
+               C 100 640, 240 650, 360 610 
+               C 480 570, 540 450, 470 380 
+               C 400 310, 290 350, 300 460 
+               C 310 570, 410 630, 560 580 
+               C 740 520, 920 410, 1100 310 
+               C 1260 220, 1440 130, 1720 60"
             stroke="#00A86B"
-            strokeWidth="34"
+            strokeWidth="22"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-desktop"
@@ -86,12 +88,15 @@ export const OrganicFlowLine = ({ className = "" }) => {
         <g className="saldo-swirl-container-tab">
           {/* Custom Proportional Curve for iPad Mini Aspect Ratio */}
           <path
-            d="M -60 530 
-               C 80 500, 180 570, 320 590 
-               C 460 610, 580 530, 680 430 
-               C 760 350, 840 360, 960 440"
+            d="M -60 620 
+               C 60 640, 140 650, 220 600 
+               C 300 550, 340 440, 290 380 
+               C 240 320, 160 360, 170 460 
+               C 180 560, 250 620, 360 560 
+               C 470 500, 600 390, 720 280 
+               C 800 200, 880 130, 980 60"
             stroke="#00A86B"
-            strokeWidth="24"
+            strokeWidth="16"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-tablet"
@@ -128,7 +133,7 @@ export const OrganicFlowLine = ({ className = "" }) => {
                C 190 460, 140 560, 210 630 
                C 280 690, 370 580, 480 440"
             stroke="#00A86B"
-            strokeWidth="24"
+            strokeWidth="18"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-mobile"
