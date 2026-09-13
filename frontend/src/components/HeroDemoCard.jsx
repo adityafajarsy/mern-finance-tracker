@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, ArrowRight, CheckCircle2, Mic, Coffee } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mic, Coffee } from "lucide-react";
 
 export const HeroDemoCard = ({ className = "" }) => {
   const fullText = "gua abis beli es teh 10ribu";
@@ -82,27 +82,10 @@ export const HeroDemoCard = ({ className = "" }) => {
           : "translate-x-28 opacity-0 scale-95"
       } ${className}`}
     >
-      <div className="w-72 sm:w-80 lg:w-84 bg-white/95 dark:bg-[#071913]/95 backdrop-blur-xl border border-[#D1EADE] dark:border-[#14382C] rounded-2xl shadow-[0_22px_45px_rgba(8,36,27,0.16)] p-4 select-none">
+      <div className="w-72 sm:w-80 lg:w-84 bg-white/95 dark:bg-[#071913]/95 backdrop-blur-xl border border-[#D1EADE] dark:border-[#14382C] rounded-2xl shadow-[0_22px_45px_rgba(8,36,27,0.16)] p-3 sm:p-3.5 select-none">
         
-        {/* Card Header: Live AI Demo Badge */}
-        <div className="flex items-center justify-between pb-2.5 border-b border-[#E8F5EE] dark:border-[#14382C]/70">
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A86B] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00A86B]"></span>
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#00A86B]">
-              Simulasi Input Cepat
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-[10px] font-bold text-[#1C5F4D] dark:text-[#88C8AC]">
-            <Sparkles className="w-3 h-3 text-[#00A86B]" />
-            <span>AI Otomatis</span>
-          </div>
-        </div>
-
         {/* Input Bar Simulation */}
-        <div className="mt-3 relative flex items-center bg-[#F4FAF6] dark:bg-[#0A221A] border border-[#D1EADE]/80 dark:border-[#1A4737] rounded-xl px-3 py-2.5 transition-all shadow-inner">
+        <div className="relative flex items-center bg-[#F4FAF6] dark:bg-[#0A221A] border border-[#D1EADE]/80 dark:border-[#1A4737] rounded-xl px-3.5 py-3 transition-all shadow-inner">
           <Mic className="w-3.5 h-3.5 text-[#00A86B] shrink-0 mr-2" />
           
           <div className="flex-1 text-xs text-[#09261E] dark:text-white font-medium truncate flex items-center min-h-[1.25rem]">
