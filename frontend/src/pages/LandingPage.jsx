@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Mic,
   Keyboard,
-  Zap,
   Menu,
   X
 } from "lucide-react";
@@ -172,22 +171,6 @@ const LandingPage = () => {
             <p className="text-base sm:text-lg md:text-base lg:text-lg 2xl:text-xl text-[#1C5F4D] max-w-lg 2xl:max-w-2xl font-medium leading-relaxed mx-auto md:mx-0">
               Catat pengeluaran, pantau kebiasaan jajan, dan tahu sisa uang sebelum gajian tanpa ribet isi form panjang atau buka spreadsheet.
             </p>
-
-            {/* Input method highlight pills */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#D1EADE] text-[#09261E] text-xs font-bold shadow-xs">
-                <Keyboard className="w-3.5 h-3.5 text-[#00A86B]" />
-                Cukup ketik satu kalimat
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#00A86B]/10 border border-[#00A86B]/30 text-[#09261E] text-xs font-bold">
-                <Mic className="w-3.5 h-3.5 text-[#00A86B]" />
-                Atau langsung ngomong
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#D1EADE] text-[#09261E] text-xs font-bold shadow-xs">
-                <Zap className="w-3.5 h-3.5 text-[#00A86B]" />
-                Langsung terkategori otomatis
-              </span>
-            </div>
 
             <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-3 sm:gap-3.5 2xl:gap-5 pt-2 max-w-sm sm:max-w-none mx-auto md:mx-0">
               <Link
