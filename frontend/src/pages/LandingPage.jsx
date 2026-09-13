@@ -6,18 +6,11 @@ import {
   Check, 
   Plus, 
   Minus, 
-  Shield, 
-  TrendingUp, 
   Landmark, 
-  PieChart, 
-  Clock,
   ArrowUpRight,
   CreditCard,
   Wallet,
   CheckCircle2,
-  Calendar,
-  Flame,
-  ArrowLeftRight,
   Menu,
   X
 } from "lucide-react";
@@ -111,8 +104,6 @@ const LandingPage = () => {
           {/* Desktop & Tablet Nav Links */}
           <nav className="hidden md:flex items-center md:gap-3.5 lg:gap-8 2xl:gap-12 text-[11px] lg:text-xs 2xl:text-sm font-bold text-[#14493A] dark:text-[#88C8AC] whitespace-nowrap shrink-0">
             <a href="#how-it-works" className="hover:text-[#00A86B] transition-colors">How It Works</a>
-            <a href="#insights" className="hover:text-[#00A86B] transition-colors">Insights</a>
-            <a href="#forecast" className="hover:text-[#00A86B] transition-colors">Forecast</a>
             <a href="#accounts" className="hover:text-[#00A86B] transition-colors">Accounts</a>
             <a href="#why-saldo" className="hover:text-[#00A86B] transition-colors">Why SALDO</a>
           </nav>
@@ -155,8 +146,6 @@ const LandingPage = () => {
             <X className="w-5 h-5" />
           </button>
           <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">How It Works</a>
-          <a href="#insights" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Insights</a>
-          <a href="#forecast" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Forecast</a>
           <a href="#accounts" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Accounts</a>
           <a href="#why-saldo" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Why SALDO</a>
           <div className="flex flex-col gap-3 w-full max-w-xs mt-4">
@@ -379,8 +368,8 @@ const LandingPage = () => {
           </p>
         </div>
 
-        {/* Rising Half-Peek iPad Showcase (Top-half reveals beautifully, bottom-half bleeds into next section) */}
-        <div className="relative max-w-4xl 2xl:max-w-5xl mx-auto flex justify-center -mb-10 sm:-mb-16 md:-mb-24 2xl:-mb-32 select-none pointer-events-none">
+        {/* iPad Showcase */}
+        <div className="relative max-w-4xl 2xl:max-w-5xl mx-auto flex justify-center pb-12 sm:pb-16 select-none pointer-events-none">
           {/* Soft Ambient Glow Behind Device Upper Bezel */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#00A86B]/15 blur-3xl rounded-full -z-10" />
 
@@ -389,172 +378,20 @@ const LandingPage = () => {
             <img
               src={ipadVersion}
               alt="SALDO Tablet Experience"
-              className="w-full h-auto object-contain drop-shadow-[0_-25px_40px_rgba(9,38,30,0.14)] transform hover:scale-[1.01] transition-transform duration-500"
+              className="w-full h-auto object-contain drop-shadow-[0_25px_40px_rgba(9,38,30,0.12)] transform hover:scale-[1.01] transition-transform duration-500"
             />
           </div>
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* 04 — DARK: DEEP FOREST INSIGHTS SHOWCASE                                  */}
-      {/* ========================================================================= */}
-      <section id="insights" className="bg-gradient-to-b from-[#061F16] via-[#09261E] to-[#051811] text-white py-24 md:py-32 2xl:py-40 px-4 sm:px-8 relative overflow-hidden">
-        
-        {/* Subtle Background Swirling Line */}
-        <div className="absolute top-10 right-0 w-96 h-96 opacity-20 pointer-events-none">
-          <svg viewBox="0 0 400 400" fill="none" className="w-full h-full">
-            <path d="M 50 350 C 150 200, 250 380, 350 150" stroke="#00A86B" strokeWidth="16" strokeLinecap="round" />
-          </svg>
-        </div>
-
-        <div className="max-w-6xl 2xl:max-w-[1540px] mx-auto space-y-12 2xl:space-y-16 relative z-10">
-          
-          {/* Header Narrative */}
-          <div className="max-w-2xl 2xl:max-w-3xl space-y-4">
-            <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-              02 · Financial Intelligence
-            </span>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl 2xl:text-7xl font-black font-display tracking-tight text-white leading-tight">
-              What happened to my money?
-            </h2>
-            <p className="text-sm sm:text-base 2xl:text-lg text-[#B7DFCD] font-medium leading-relaxed">
-              SALDO turns everyday transactions into something you can actually understand. No four-corner dashboard grid, just clear narrative understanding.
-            </p>
-          </div>
-
-          {/* ONE Large Integrated Financial Visualization Presentation */}
-          <div className="border-t border-white/15 pt-8 2xl:pt-12 space-y-8 2xl:space-y-10">
-            
-            {/* Inline Cashflow Statement */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 2xl:gap-12 sm:divide-x sm:divide-white/10">
-              <div className="space-y-1">
-                <span className="text-[10px] 2xl:text-xs font-bold uppercase tracking-wider text-[#88C8AC]">Income</span>
-                <p className="text-3xl 2xl:text-4xl font-black font-display text-emerald-400 tabular-nums">Rp 8.500.000</p>
-                <p className="text-[10px] 2xl:text-xs text-[#88C8AC]">Across 3 primary streams</p>
-              </div>
-
-              <div className="space-y-1 sm:pl-8 2xl:pl-12">
-                <span className="text-[10px] 2xl:text-xs font-bold uppercase tracking-wider text-[#88C8AC]">Spent</span>
-                <p className="text-3xl 2xl:text-4xl font-black font-display text-rose-300 tabular-nums">Rp 5.900.000</p>
-                <p className="text-[10px] 2xl:text-xs text-[#88C8AC]">6% lower than previous month</p>
-              </div>
-
-              <div className="space-y-1 sm:pl-8 2xl:pl-12">
-                <span className="text-[10px] 2xl:text-xs font-bold uppercase tracking-wider text-[#00A86B]">Net Saved</span>
-                <p className="text-3xl 2xl:text-4xl font-black font-display text-white tabular-nums">Rp 2.600.000</p>
-                <p className="text-[10px] 2xl:text-xs text-[#00A86B] font-semibold">31% monthly savings rate</p>
-              </div>
-            </div>
-
-            {/* Category Progress Strip */}
-            <div className="space-y-3 pt-4 border-t border-white/10">
-              <div className="flex justify-between items-center text-xs 2xl:text-sm">
-                <span className="font-bold text-white">Top Flexible Expenses</span>
-                <span className="text-[#88C8AC]">Food & Drinks · Transportation · Shopping</span>
-              </div>
-              <div className="w-full h-3 2xl:h-4 bg-white/10 rounded-full overflow-hidden flex gap-1 p-0.5">
-                <div className="h-full bg-[#00A86B] rounded-full w-[45%]" title="Food & Drinks 45%" />
-                <div className="h-full bg-[#10B981] rounded-full w-[25%]" title="Transportation 25%" />
-                <div className="h-full bg-[#34D399] rounded-full w-[15%]" title="Shopping 15%" />
-                <div className="h-full bg-white/30 rounded-full w-[15%]" title="Other 15%" />
-              </div>
-            </div>
-
-            {/* Contextual Discretionary AI Observation Annotation */}
-            <div className="bg-white/5 border-l-4 border-[#00A86B] p-5 2xl:p-7 rounded-r-2xl space-y-1.5">
-              <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-                Contextual Observation
-              </span>
-              <p className="text-sm 2xl:text-base font-bold text-white">
-                Food & Drinks is running Rp 300K above your usual pace.
-              </p>
-              <p className="text-xs 2xl:text-sm text-[#B7DFCD] leading-relaxed">
-                Discretionary dining accounts for 45% of this month's spending. Reducing flexible outings by Rp 200K will preserve your 34% savings target before your next payday.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 05 — LIGHT: FORECAST (DETERMINISTIC FINANCIAL INSTRUMENT)                 */}
-      {/* ========================================================================= */}
-      <section id="forecast" className="py-20 md:py-28 2xl:py-36 px-4 sm:px-6 md:px-8 max-w-6xl 2xl:max-w-[1540px] mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* LEFT: Explanation */}
-          <div className="md:col-span-5 space-y-5 2xl:space-y-7 text-left">
-            <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-              03 · Deterministic Forecast
-            </span>
-
-            <h2 className="text-4xl sm:text-5xl 2xl:text-6xl font-black font-display tracking-tight text-[#09261E] leading-tight">
-              Know what's coming.
-            </h2>
-
-            <p className="text-sm sm:text-base 2xl:text-lg text-[#1C5F4D] leading-relaxed font-medium">
-              SALDO continuously calculates your daily burn rate against elapsed calendar days to project your exact wealth before your next payday.
-            </p>
-            <p className="text-xs 2xl:text-sm text-[#1C5F4D] opacity-80">
-              No AI hallucinations or fabricated guesses — pure deterministic financial math.
-            </p>
-          </div>
-
-          {/* RIGHT: Financial Forecast Instrument Surface */}
-          <div className="md:col-span-7 bg-white rounded-3xl p-6 sm:p-8 2xl:p-12 border border-[#D1EADE] shadow-lg space-y-6">
-            
-            <div className="flex justify-between items-baseline">
-              <div>
-                <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-wider text-[#1C5F4D]">
-                  Estimated Balance Before Payday
-                </span>
-                <h3 className="text-4xl sm:text-5xl 2xl:text-6xl font-black font-display tracking-tight text-[#09261E] mt-1 tabular-nums">
-                  Rp 2.600.000
-                </h3>
-              </div>
-              <span className="text-xs 2xl:text-sm font-bold text-[#00A86B] bg-[#E8F5EE] px-3.5 py-1.5 rounded-full">
-                At your current spending pace
-              </span>
-            </div>
-
-            {/* Trajectory Timeline: TODAY → SPENDING PACE → PAYDAY */}
-            <div className="space-y-2 pt-2 border-t border-[#E8F5EE]">
-              <div className="flex justify-between text-xs 2xl:text-sm font-bold text-[#1C5F4D]">
-                <span>Today (Day 18)</span>
-                <span className="text-[#00A86B]">Rp 195.000 / day pace</span>
-                <span>Payday (Aug 31)</span>
-              </div>
-
-              {/* Sparkline Curve */}
-              <div className="h-16 2xl:h-20 w-full pt-1">
-                <svg viewBox="0 0 400 60" fill="none" className="w-full h-full">
-                  <path d="M 0 45 Q 120 38, 200 24 T 400 12" stroke="#00A86B" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M 0 45 Q 120 38, 200 24 T 400 12 L 400 60 L 0 60 Z" fill="#00A86B" opacity="0.1" />
-                  <circle cx="200" cy="24" r="4" fill="#00A86B" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center text-xs 2xl:text-sm text-[#1C5F4D] pt-2 border-t border-[#E8F5EE]">
-              <span>13 days remaining in billing cycle</span>
-              <span className="font-semibold text-[#09261E]">Projected spend: Rp 5.900.000</span>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 06 — LIGHT: ACCOUNTS (ALL YOUR MONEY. ONE CLEAR PICTURE.)                 */}
+      {/* 04 — LIGHT: ACCOUNTS (ALL YOUR MONEY. ONE CLEAR PICTURE.)                 */}
       {/* ========================================================================= */}
       <section id="accounts" className="py-20 md:py-28 2xl:py-36 px-4 sm:px-8 max-w-6xl 2xl:max-w-[1540px] mx-auto border-t border-[#D1EADE]/70 relative z-10">
         
         <div className="text-center max-w-2xl 2xl:max-w-3xl mx-auto mb-12 2xl:mb-16 space-y-3">
           <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-            04 · Unified Accounts
+            02 · Unified Accounts
           </span>
           <h2 className="text-4xl sm:text-5xl 2xl:text-6xl font-black font-display tracking-tight text-[#09261E]">
             All your money. One clear picture.
@@ -819,8 +656,6 @@ const LandingPage = () => {
                 <span className="text-xs font-extrabold uppercase tracking-wider text-white">Features</span>
                 <div className="flex flex-col gap-2.5 text-xs text-zinc-400 font-medium">
                   <a href="#how-it-works" className="hover:text-[#00A86B] transition-colors">How It Works</a>
-                  <a href="#insights" className="hover:text-[#00A86B] transition-colors">Insights & Analysis</a>
-                  <a href="#forecast" className="hover:text-[#00A86B] transition-colors">Payday Forecasting</a>
                   <a href="#accounts" className="hover:text-[#00A86B] transition-colors">Account Management</a>
                   <a href="#why-saldo" className="hover:text-[#00A86B] transition-colors">Why SALDO</a>
                 </div>
