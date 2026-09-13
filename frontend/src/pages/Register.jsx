@@ -305,7 +305,7 @@ const Register = () => {
                   Buat Akun Gratis
                 </h1>
                 <p className="text-xs sm:text-sm text-[#1C5F4D] dark:text-[#88C8AC] leading-relaxed font-medium">
-                  Daftar di SALDO dan mulai catat keuanganmu dengan simpel — ketik atau ngomong, beres dalam detik.
+                  Daftar di SALDO dan mulai catat keuanganmu dengan simpel. Cukup ketik atau ngomong, beres dalam detik.
                 </p>
               </div>
 

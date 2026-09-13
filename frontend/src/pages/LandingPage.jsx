@@ -55,27 +55,27 @@ const LandingPage = () => {
     {
       num: "01",
       title: "Satu kalimat. Langsung tercatat.",
-      description: "Gak perlu buka-tutup dropdown kategori, pilih tanggal manual, atau isi form panjang. Cukup ketik atau ngomong santai — SALDO langsung paham dan rapiin semuanya dalam hitungan detik.",
+      description: "Gak perlu buka-tutup dropdown kategori, pilih tanggal manual, atau isi form panjang. Cukup ketik atau ngomong santai, SALDO langsung paham dan rapiin semuanya dalam hitungan detik.",
     },
     {
       num: "02",
       title: "Bisa lewat suara, bukan cuma ketik",
-      description: "Tinggal tekan tombol mic, ngomong transaksi kamu kayak lagi chat — 'habis makan siang 35rb pake gopay' — SALDO otomatis transkripsi dan kategorikan tanpa kamu perlu sentuh keyboard sama sekali.",
+      description: "Tinggal tekan tombol mic, ngomong transaksi kamu kayak lagi chat misalnya 'habis makan siang 35rb pake gopay', SALDO otomatis transkripsi dan kategorikan tanpa kamu perlu sentuh keyboard sama sekali.",
     },
     {
       num: "03",
       title: "Kategori otomatis, tepat sasaran",
-      description: "SALDO otomatis kenali konteks dari kalimatmu dan kategorikan ke Makanan & Minuman, Transportasi, Belanja, atau Tagihan — tanpa kamu harus milih satu per satu.",
+      description: "SALDO otomatis kenali konteks dari kalimatmu dan kategorikan ke Makanan & Minuman, Transportasi, Belanja, atau Tagihan tanpa kamu harus milih satu per satu.",
     },
     {
       num: "04",
       title: "Tahu ke mana duit kamu lari",
-      description: "Lihat ringkasan arus keuangan bulananmu secara utuh — bukan sekadar daftar transaksi mentah. SALDO bantu kamu ngerti pola jajan dan nemu kebocoran yang sering gak disadari.",
+      description: "Lihat ringkasan arus keuangan bulananmu secara utuh, bukan sekadar daftar transaksi mentah. SALDO bantu kamu ngerti pola jajan dan nemu kebocoran yang sering gak disadari.",
     },
     {
       num: "05",
       title: "Prediksi saldo sebelum gajian",
-      description: "SALDO hitung estimasi sisa saldo sebelum tanggal gajian berdasarkan laju pengeluaran harianmu — bukan tebak-tebakan, tapi matematika finansial yang real dan akurat.",
+      description: "SALDO hitung estimasi sisa saldo sebelum tanggal gajian berdasarkan laju pengeluaran harianmu. Bukan tebak-tebakan, tapi hitungan finansial yang real dan akurat.",
     },
   ];
 
@@ -170,7 +170,7 @@ const LandingPage = () => {
             </h1>
 
             <p className="text-base sm:text-lg md:text-base lg:text-lg 2xl:text-xl text-[#1C5F4D] max-w-lg 2xl:max-w-2xl font-medium leading-relaxed mx-auto md:mx-0">
-              Catat pengeluaran, pantau kebiasaan jajan, dan tahu sisa uang sebelum gajian — tanpa ribet isi form panjang atau buka spreadsheet.
+              Catat pengeluaran, pantau kebiasaan jajan, dan tahu sisa uang sebelum gajian tanpa ribet isi form panjang atau buka spreadsheet.
             </p>
 
             {/* Input method highlight pills */}
@@ -237,7 +237,7 @@ const LandingPage = () => {
             </h2>
 
             <p className="text-sm sm:text-base text-[#1C5F4D] leading-relaxed font-medium">
-              Gak perlu pilih tanggal, dropdown kategori, atau form berlapis. Tinggal <strong>ketik</strong> atau <strong>ngomong</strong> santai — SALDO yang rapiin semuanya otomatis. Sekali input, beres.
+              Gak perlu pilih tanggal, dropdown kategori, atau form berlapis. Tinggal <strong>ketik</strong> atau <strong>ngomong</strong> santai, SALDO yang rapiin semuanya otomatis. Sekali input, beres.
             </p>
 
             <div className="flex flex-wrap gap-2">
@@ -418,7 +418,7 @@ const LandingPage = () => {
             </h2>
 
             <p className="text-base sm:text-lg 2xl:text-xl text-[#B7DFCD] leading-relaxed font-medium">
-              SALDO diam-diam rapiin semua arus kasmu — kamu tinggal pantau dan nikmatin hasilnya tanpa takut dompet boncos di akhir bulan.
+              SALDO otomatis rapiin semua arus kasmu. Kamu tinggal pantau dan nikmatin hasilnya tanpa takut dompet boncos di akhir bulan.
             </p>
 
             <div className="pt-2">
@@ -467,7 +467,7 @@ const LandingPage = () => {
                   </div>
 
                   <span className="text-xs 2xl:text-sm font-mono text-[#00A86B] ml-4 shrink-0">
-                    {isOpen ? "—" : "+"}
+                    {isOpen ? "−" : "+"}
                   </span>
                 </button>
 
@@ -525,7 +525,7 @@ const LandingPage = () => {
               </Link>
 
               <p className="text-zinc-400 text-sm leading-relaxed max-w-md font-medium">
-                Asisten finansial pintar yang dirancang buat kamu yang males ribet. Ketik atau ngomong apa yang terjadi — SALDO rapiin, kategoriin, dan bantu kamu paham ke mana duit kamu pergi.
+                Asisten finansial pintar yang dirancang buat kamu yang males ribet. Ketik atau ngomong apa yang terjadi, SALDO rapiin, kategoriin, dan bantu kamu paham ke mana duit kamu pergi.
               </p>
 
               <div className="flex items-center gap-3 pt-2">

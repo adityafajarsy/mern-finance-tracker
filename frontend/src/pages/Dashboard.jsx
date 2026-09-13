@@ -514,7 +514,7 @@ const Dashboard = () => {
       </main>
 
       {/* ========================================================================= */}
-      {/* 09 — DYNAMIC AI CAPTURE INPUT BAR (WITH TYPEWRITER & AMBIENT GLOW)        */}
+      {/* 09 - DYNAMIC AI CAPTURE INPUT BAR (WITH TYPEWRITER & AMBIENT GLOW)        */}
       {/* ========================================================================= */}
       <div className="fixed bottom-22 md:bottom-8 left-1/2 -translate-x-1/2 md:left-[calc(50%+7rem)] 2xl:left-[calc(50%+8rem)] w-[92%] max-w-md md:max-w-lg 2xl:max-w-xl z-30 pointer-events-auto">
         <form
@@ -586,7 +586,7 @@ const Dashboard = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 10 — MOBILE BOTTOM NAVIGATION (4 ESSENTIAL DESTINATIONS)                  */}
+      {/* 10 - MOBILE BOTTOM NAVIGATION (4 ESSENTIAL DESTINATIONS)                  */}
       {/* ========================================================================= */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#09261E]/95 backdrop-blur-lg border-t border-[#D1EADE]/80 dark:border-[#14382C] md:hidden pb-safe">
         <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-between">

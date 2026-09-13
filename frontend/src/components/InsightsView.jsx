@@ -139,7 +139,7 @@ const InsightsView = ({ authFetch }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 01 — MONTH OVERVIEW                                                       */}
+      {/* 01 - MONTH OVERVIEW                                                       */}
       {/* ========================================================================= */}
       <section className="space-y-4">
         <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
@@ -207,7 +207,7 @@ const InsightsView = ({ authFetch }) => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 02 — DAILY CASHFLOW & FINANCIAL REPORT                                    */}
+      {/* 02 - DAILY CASHFLOW & FINANCIAL REPORT                                    */}
       {/* ========================================================================= */}
       <section className="space-y-4 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
         <div className="flex justify-between items-end">
@@ -368,7 +368,7 @@ const InsightsView = ({ authFetch }) => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 03 — COMPARISON                                                           */}
+      {/* 03 - COMPARISON                                                           */}
       {/* ========================================================================= */}
       <section className="space-y-4 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
         <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
@@ -421,7 +421,7 @@ const InsightsView = ({ authFetch }) => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 04 — FORECAST                                                             */}
+      {/* 04 - FORECAST                                                             */}
       {/* ========================================================================= */}
       {forecast && (
         <section className="space-y-4 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
@@ -447,7 +447,7 @@ const InsightsView = ({ authFetch }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* 05 — AI FINANCIAL ADVICE                                                  */}
+      {/* 05 - AI FINANCIAL ADVICE                                                  */}
       {/* ========================================================================= */}
       <section className="space-y-4 pt-4 border-t border-[#D1EADE]/70 dark:border-[#14382C]">
         <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">

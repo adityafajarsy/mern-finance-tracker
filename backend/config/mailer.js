@@ -187,7 +187,7 @@ export const sendOtpEmail = async ({ toEmail, otpCode, userName = "Sahabat SALDO
         </div>
       </div>
       <div class="footer">
-        <p>Email otomatis ini dikirim oleh SALDO — Personal Finance Intelligent Companion.</p>
+        <p>Email otomatis ini dikirim oleh SALDO. Asisten Finansial Pintar.</p>
         <p>Jika Anda tidak merasa melakukan permintaan ini, abaikan email ini.</p>
       </div>
     </div>
