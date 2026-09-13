@@ -120,13 +120,13 @@ const LandingPage = () => {
           <div className="flex items-center gap-2 2xl:gap-4 shrink-0">
             <Link
               to="/login"
-              className="px-2.5 sm:px-3.5 py-2 text-xs 2xl:text-sm font-bold text-[#09261E] dark:text-white hover:text-[#00A86B] transition-colors whitespace-nowrap"
+              className="hidden md:inline-flex px-2.5 sm:px-3.5 py-2 text-xs 2xl:text-sm font-bold text-[#09261E] dark:text-white hover:text-[#00A86B] transition-colors whitespace-nowrap"
             >
               Masuk
             </Link>
             <Link
               to="/register"
-              className="px-4 sm:px-5 2xl:px-7 py-2 2xl:py-2.5 rounded-full text-xs 2xl:text-sm font-black bg-[#00A86B] hover:bg-[#00935D] text-white transition-all shadow-md shadow-[#00A86B]/20 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="hidden md:inline-flex px-4 sm:px-5 2xl:px-7 py-2 2xl:py-2.5 rounded-full text-xs 2xl:text-sm font-black bg-[#00A86B] hover:bg-[#00935D] text-white transition-all shadow-md shadow-[#00A86B]/20 items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>Mulai Gratis</span>
               <ArrowRight className="w-3.5 h-3.5" />
