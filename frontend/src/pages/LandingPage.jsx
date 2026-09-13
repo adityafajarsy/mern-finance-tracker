@@ -6,10 +6,7 @@ import {
   Check, 
   Plus, 
   Minus, 
-  Landmark, 
   ArrowUpRight,
-  CreditCard,
-  Wallet,
   CheckCircle2,
   Menu,
   X
@@ -18,7 +15,6 @@ import OrganicFlowLine from "../components/ui/OrganicFlowLine";
 import HeroProductVisual from "../components/HeroProductVisual";
 import hpHeroImage from "../assets/hp_hero.webp";
 import hpDarkVersion from "../assets/hp-dark-version.webp";
-import ipadVersion from "../assets/ipad-version.webp";
 
 const LandingPage = () => {
   const [openAccordion, setOpenAccordion] = useState(0);
@@ -104,7 +100,6 @@ const LandingPage = () => {
           {/* Desktop & Tablet Nav Links */}
           <nav className="hidden md:flex items-center md:gap-3.5 lg:gap-8 2xl:gap-12 text-[11px] lg:text-xs 2xl:text-sm font-bold text-[#14493A] dark:text-[#88C8AC] whitespace-nowrap shrink-0">
             <a href="#how-it-works" className="hover:text-[#00A86B] transition-colors">How It Works</a>
-            <a href="#accounts" className="hover:text-[#00A86B] transition-colors">Accounts</a>
             <a href="#why-saldo" className="hover:text-[#00A86B] transition-colors">Why SALDO</a>
           </nav>
 
@@ -146,7 +141,6 @@ const LandingPage = () => {
             <X className="w-5 h-5" />
           </button>
           <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">How It Works</a>
-          <a href="#accounts" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Accounts</a>
           <a href="#why-saldo" onClick={() => setMobileOpen(false)} className="text-xl font-bold font-display text-white">Why SALDO</a>
           <div className="flex flex-col gap-3 w-full max-w-xs mt-4">
             <Link to="/login" onClick={() => setMobileOpen(false)} className="w-full py-3.5 bg-white/10 text-white rounded-full font-bold text-sm">
@@ -351,108 +345,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 03 — LIGHT: EDITORIAL WHITESPACE STATEMENT & IPAD HORIZON PEEK            */}
-      {/* ========================================================================= */}
-      <section className="pt-24 md:pt-36 2xl:pt-44 pb-0 px-4 sm:px-8 max-w-5xl 2xl:max-w-7xl mx-auto text-center relative z-10 overflow-hidden">
-        <div className="max-w-3xl 2xl:max-w-5xl mx-auto space-y-6 2xl:space-y-8 mb-12 sm:mb-16 md:mb-20">
-          <p className="text-[11px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-            A New Standard For Personal Finance
-          </p>
-
-          <h2 className="text-4xl sm:text-6xl md:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-[#09261E] leading-[1.04]">
-            You don't need another spreadsheet.
-          </h2>
-
-          <p className="text-lg sm:text-2xl 2xl:text-3xl text-[#1C5F4D] font-medium leading-relaxed max-w-2xl 2xl:max-w-4xl mx-auto">
-            You just need to tell SALDO what happened. Complexity belongs inside the engine, not on your screen.
-          </p>
-        </div>
-
-        {/* iPad Showcase */}
-        <div className="relative max-w-4xl 2xl:max-w-5xl mx-auto flex justify-center pb-12 sm:pb-16 select-none pointer-events-none">
-          {/* Soft Ambient Glow Behind Device Upper Bezel */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#00A86B]/15 blur-3xl rounded-full -z-10" />
-
-          {/* iPad Mockup */}
-          <div className="relative w-full max-w-3xl 2xl:max-w-4xl pt-2">
-            <img
-              src={ipadVersion}
-              alt="SALDO Tablet Experience"
-              className="w-full h-auto object-contain drop-shadow-[0_25px_40px_rgba(9,38,30,0.12)] transform hover:scale-[1.01] transition-transform duration-500"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 04 — LIGHT: ACCOUNTS (ALL YOUR MONEY. ONE CLEAR PICTURE.)                 */}
-      {/* ========================================================================= */}
-      <section id="accounts" className="py-20 md:py-28 2xl:py-36 px-4 sm:px-8 max-w-6xl 2xl:max-w-[1540px] mx-auto border-t border-[#D1EADE]/70 relative z-10">
-        
-        <div className="text-center max-w-2xl 2xl:max-w-3xl mx-auto mb-12 2xl:mb-16 space-y-3">
-          <span className="text-[10px] 2xl:text-xs font-extrabold uppercase tracking-widest text-[#00A86B]">
-            02 · Unified Accounts
-          </span>
-          <h2 className="text-4xl sm:text-5xl 2xl:text-6xl font-black font-display tracking-tight text-[#09261E]">
-            All your money. One clear picture.
-          </h2>
-          <p className="text-sm sm:text-base 2xl:text-lg text-[#1C5F4D] font-medium">
-            Seamlessly monitor Bank accounts, E-Wallets, and Cash in one place with automatic default routing.
-          </p>
-        </div>
-
-        {/* Visual Account Objects Strip */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 2xl:gap-8">
-          
-          <div className="bg-white rounded-2xl p-6 2xl:p-8 border border-[#D1EADE] shadow-xs space-y-4 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 2xl:w-12 2xl:h-12 rounded-xl bg-[#00A86B] text-white flex items-center justify-center font-bold">
-                <Landmark className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </div>
-              <span className="text-[9px] 2xl:text-[10px] font-extrabold uppercase px-2.5 py-1 bg-[#E8F5EE] text-[#00A86B] rounded-md">
-                Default Expense
-              </span>
-            </div>
-            <div>
-              <p className="text-xs 2xl:text-sm font-bold text-[#1C5F4D]">Bank Central Asia</p>
-              <h4 className="text-2xl 2xl:text-3xl font-black font-display text-[#09261E] mt-0.5 tabular-nums">Rp 4.200.000</h4>
-            </div>
-            <p className="text-[10px] 2xl:text-xs text-[#1C5F4D] pt-2 border-t border-[#E8F5EE]">Primary operating account</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 2xl:p-8 border border-[#D1EADE] shadow-xs space-y-4 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 2xl:w-12 2xl:h-12 rounded-xl bg-[#0284C7] text-white flex items-center justify-center font-bold">
-                <Wallet className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </div>
-              <span className="text-[9px] 2xl:text-[10px] font-bold text-[#1C5F4D]">E-Wallet</span>
-            </div>
-            <div>
-              <p className="text-xs 2xl:text-sm font-bold text-[#1C5F4D]">GoPay Wallet</p>
-              <h4 className="text-2xl 2xl:text-3xl font-black font-display text-[#09261E] mt-0.5 tabular-nums">Rp 500.000</h4>
-            </div>
-            <p className="text-[10px] 2xl:text-xs text-[#1C5F4D] pt-2 border-t border-[#E8F5EE]">Instant daily coffee & ride-hail</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 2xl:p-8 border border-[#D1EADE] shadow-xs space-y-4 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <div className="w-10 h-10 2xl:w-12 2xl:h-12 rounded-xl bg-[#059669] text-white flex items-center justify-center font-bold">
-                <CreditCard className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </div>
-              <span className="text-[9px] 2xl:text-[10px] font-bold text-[#1C5F4D]">Cash</span>
-            </div>
-            <div>
-              <p className="text-xs 2xl:text-sm font-bold text-[#1C5F4D]">Physical Cash Wallet</p>
-              <h4 className="text-2xl 2xl:text-3xl font-black font-display text-[#09261E] mt-0.5 tabular-nums">Rp 200.000</h4>
-            </div>
-            <p className="text-[10px] 2xl:text-xs text-[#1C5F4D] pt-2 border-t border-[#E8F5EE]">Street food & parking petty cash</p>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 07 — DARK: DUAL-DEVICE SHOWCASE (SERRA-INSPIRED ADVERTISING SHOWCASE)     */}
+      {/* 02 — DARK: DUAL-DEVICE SHOWCASE (SERRA-INSPIRED ADVERTISING SHOWCASE)     */}
       {/* ========================================================================= */}
       <section className="bg-gradient-to-br from-[#061F16] via-[#09261E] to-[#04140E] text-white py-24 md:py-32 2xl:py-44 px-4 sm:px-8 relative overflow-hidden">
         
@@ -656,7 +549,6 @@ const LandingPage = () => {
                 <span className="text-xs font-extrabold uppercase tracking-wider text-white">Features</span>
                 <div className="flex flex-col gap-2.5 text-xs text-zinc-400 font-medium">
                   <a href="#how-it-works" className="hover:text-[#00A86B] transition-colors">How It Works</a>
-                  <a href="#accounts" className="hover:text-[#00A86B] transition-colors">Account Management</a>
                   <a href="#why-saldo" className="hover:text-[#00A86B] transition-colors">Why SALDO</a>
                 </div>
               </div>
