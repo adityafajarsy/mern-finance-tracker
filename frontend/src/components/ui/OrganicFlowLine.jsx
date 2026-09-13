@@ -54,7 +54,7 @@ export const OrganicFlowLine = ({ className = "" }) => {
                C 1270 95, 1180 140, 1210 280 
                C 1235 390, 1380 290, 1720 100"
             stroke="#00A86B"
-            strokeWidth="15.5"
+            strokeWidth="24"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-desktop"
@@ -102,7 +102,7 @@ export const OrganicFlowLine = ({ className = "" }) => {
                C 750 330, 680 370, 700 440 
                C 720 500, 800 450, 960 210"
             stroke="#00A86B"
-            strokeWidth="11"
+            strokeWidth="18"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-tablet"
@@ -139,7 +139,7 @@ export const OrganicFlowLine = ({ className = "" }) => {
                C 190 460, 140 560, 210 630 
                C 280 690, 370 580, 480 440"
             stroke="#00A86B"
-            strokeWidth="12"
+            strokeWidth="18"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="saldo-swirl-path-mobile"
