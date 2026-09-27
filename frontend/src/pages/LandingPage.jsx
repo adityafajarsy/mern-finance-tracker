@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Sparkles,
   Check,
   Plus,
   Minus,
@@ -55,31 +54,31 @@ const LandingPage = () => {
       num: "01",
       title: "Satu kalimat. Langsung tercatat.",
       description:
-        "Gak perlu buka-tutup dropdown kategori, pilih tanggal manual, atau isi form panjang. Cukup ketik atau ngomong santai, SALDO langsung paham dan rapiin semuanya dalam hitungan detik.",
+        "Gak perlu buka-tutup dropdown kategori, pilih tanggal manual, atau isi form panjang. Cukup ketik atau ngomong santai, semua langsung rapi dalam hitungan detik.",
     },
     {
       num: "02",
       title: "Bisa lewat suara, bukan cuma ketik",
       description:
-        "Tinggal tekan tombol mic, ngomong transaksi kamu kayak lagi chat misalnya 'habis makan siang 35rb pake gopay', SALDO otomatis transkripsi dan kategorikan tanpa kamu perlu sentuh keyboard sama sekali.",
+        "Tinggal tekan tombol mic dan sebut transaksi kamu kayak lagi ngobrol biasa, misalnya 'habis makan siang 35rb pake gopay'. Nominal dan kategori langsung tercatat tanpa perlu ngetik.",
     },
     {
       num: "03",
       title: "Kategori otomatis, tepat sasaran",
       description:
-        "SALDO otomatis kenali konteks dari kalimatmu dan kategorikan ke Makanan & Minuman, Transportasi, Belanja, atau Tagihan tanpa kamu harus milih satu per satu.",
+        "Kategori langsung terisi dari apa yang kamu sebut—makanan, bensin, belanja, atau tagihan, tanpa harus milih manual satu per satu.",
     },
     {
       num: "04",
       title: "Tahu ke mana duit kamu lari",
       description:
-        "Lihat ringkasan arus keuangan bulananmu secara utuh, bukan sekadar daftar transaksi mentah. SALDO bantu kamu ngerti pola jajan dan nemu kebocoran yang sering gak disadari.",
+        "Lihat ringkasan arus keuangan bulananmu secara utuh, bukan sekadar daftar transaksi mentah. Bantu kamu paham pola pengeluaran dan tahu pos mana yang paling boros.",
     },
     {
       num: "05",
       title: "Prediksi saldo sebelum gajian",
       description:
-        "SALDO hitung estimasi sisa saldo sebelum tanggal gajian berdasarkan laju pengeluaran harianmu. Bukan tebak-tebakan, tapi hitungan finansial yang real dan akurat.",
+        "Estimasi sisa saldo sebelum tanggal gajian dihitung dari laju pengeluaran harianmu. Bukan tebak-tebakan, tapi hitungan nyata biar kamu tahu kapan harus ngerem jajan.",
     },
   ];
 
@@ -197,11 +196,6 @@ const LandingPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 lg:gap-8 items-center relative z-10">
           <div className="md:col-span-7 space-y-5 md:space-y-6 2xl:space-y-8 text-left flex flex-col items-start">
-            <div className="inline-flex items-center gap-2 px-3.5 2xl:px-4 py-1.5 2xl:py-2 rounded-full bg-white/90 border border-[#D1EADE] text-[#0E362A] text-xs 2xl:text-sm font-bold shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-[#00A86B]" />
-              <span>Asisten finansial pintar yang ngerti gaya hidup kamu</span>
-            </div>
-
             <h1 className="text-5xl sm:text-6xl md:text-5xl lg:text-7xl 2xl:text-[92px] font-black font-display tracking-tight text-[#09261E] leading-[1.04] md:leading-[1.02] text-left">
               Satu Kalimat,
               <br />
@@ -227,24 +221,6 @@ const LandingPage = () => {
               >
                 Lihat Cara Kerjanya
               </a>
-            </div>
-
-            <div className="pt-2 flex items-center justify-start gap-2 text-xs 2xl:text-sm font-serif italic text-[#1C5F4D]">
-              <span>Uangmu selalu bergerak, pantau sekarang.</span>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-[#00A86B] stroke-current stroke-2"
-              >
-                <path d="M 4 8 Q 14 6, 18 16" strokeLinecap="round" />
-                <path
-                  d="M 14 16 L 18 16 L 18 12"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </div>
           </div>
 
@@ -390,7 +366,7 @@ const LandingPage = () => {
               <div className="flex justify-between items-center border-b border-[#E8F5EE] pb-2.5">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#00A86B] flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5" />
-                  SALDO Ngerti & Langsung Kategoriin
+                  Langsung Dirapiin & Masuk Kategori
                 </span>
                 <span className="text-[10px] font-mono text-[#1C5F4D]">
                   {demoDraft.time}
@@ -481,8 +457,8 @@ const LandingPage = () => {
             </h2>
 
             <p className="text-base sm:text-lg 2xl:text-xl text-[#B7DFCD] leading-relaxed font-medium">
-              SALDO otomatis rapiin semua arus kasmu. Kamu tinggal pantau dan
-              nikmatin hasilnya tanpa takut dompet boncos di akhir bulan.
+              Semua pemasukan dan pengeluaran terkumpul rapi di satu tempat.
+              Tinggal pantau arusnya, tahu batas jajan, dan gak perlu takut boncos lagi pas akhir bulan.
             </p>
 
             <div className="pt-2">
@@ -490,7 +466,7 @@ const LandingPage = () => {
                 to="/register"
                 className="inline-flex items-center gap-2 px-7 2xl:px-9 py-3.5 2xl:py-4 bg-[#00A86B] hover:bg-[#00935D] text-white font-black text-sm 2xl:text-base rounded-full shadow-lg shadow-[#00A86B]/30 transition-all cursor-pointer"
               >
-                <span>Rasain SALDO Sekarang</span>
+                <span>Mulai Pakai SALDO</span>
                 <ArrowRight className="w-4 h-4 2xl:w-5 2xl:h-5" />
               </Link>
             </div>
@@ -570,7 +546,7 @@ const LandingPage = () => {
           </h2>
 
           <p className="text-base sm:text-lg 2xl:text-xl text-[#B7DFCD] font-medium max-w-md 2xl:max-w-xl mx-auto">
-            Cukup ketik atau ngomong apa yang terjadi. SALDO yang urus sisanya.
+            Cukup ketik atau sebut apa yang baru kamu beli. Sisanya tercatat rapi secara otomatis.
           </p>
 
           <div className="pt-4 2xl:pt-6">
@@ -598,9 +574,9 @@ const LandingPage = () => {
               </Link>
 
               <p className="text-zinc-400 text-sm leading-relaxed max-w-md font-medium">
-                Asisten finansial pintar yang dirancang buat kamu yang males
-                ribet. Ketik atau ngomong apa yang terjadi, SALDO rapiin,
-                kategoriin, dan bantu kamu paham ke mana duit kamu pergi.
+                Pencatat keuangan simpel buat kamu yang males ribet. Tinggal
+                ketik atau sebut transaksi harian, semua langsung rapi tanpa
+                harus buka spreadsheet atau form panjang.
               </p>
 
               <div className="flex items-center gap-3 pt-2">
@@ -672,7 +648,7 @@ const LandingPage = () => {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-zinc-400 font-medium">
             <p>© {new Date().getFullYear()} SALDO. Hak cipta dilindungi.</p>
-            <p className="text-zinc-500">Asisten Keuangan Pribadi Cerdas</p>
+            <p className="text-zinc-500">Pencatat Keuangan Praktis & Tanpa Ribet</p>
           </div>
         </div>
 
