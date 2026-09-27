@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { AlertCircle, Eye, EyeOff, CheckCircle2, ArrowLeft, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, CheckCircle2, ArrowLeft, Mail, ShieldCheck } from "lucide-react";
 import OtpInput from "../components/ui/OtpInput";
 import hpHeroImage from "../assets/hp_hero.webp";
 
@@ -298,7 +298,7 @@ const Register = () => {
               {/* Header Copy */}
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] dark:text-[#00E592] text-xs font-bold">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Gratis & Gampang Banget</span>
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-[#09261E] dark:text-white">

@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Flame,
   ArrowRight,
-  Sparkles,
   Search,
   SlidersHorizontal,
   Landmark,
@@ -143,7 +142,7 @@ const HomeView = ({
               className="flex flex-col items-center justify-center gap-2 w-20 h-20 shrink-0 rounded-2xl bg-[#09261E] dark:bg-[#0E362A] text-white shadow-lg shadow-[#09261E]/15 active:scale-95 transition-all cursor-pointer group"
             >
               <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-[#00A86B]/20 transition-colors">
-                <Sparkles className="w-4 h-4 text-[#00A86B]" />
+                <Plus className="w-4 h-4 text-[#00A86B]" strokeWidth={2.5} />
               </div>
               <span className="text-xs font-bold text-[#E8F5EE] tracking-tight">Catat</span>
             </button>
@@ -343,7 +342,7 @@ const HomeView = ({
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="w-7 h-7 rounded-xl bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center shrink-0">
-                <Sparkles className="w-3.5 h-3.5" />
+                <TrendingUp className="w-3.5 h-3.5" />
               </span>
               <p className="text-xs font-bold text-[#09261E] dark:text-white truncate">
                 {recommendation?.title || `Kamu berhasil menabung ${savingsRate}% dari pendapatan bulan ini`}

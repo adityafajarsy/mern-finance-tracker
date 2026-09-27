@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   X, 
-  Sparkles, 
+  PenLine,
+  MessageSquare,
   ArrowRight, 
   Check, 
   Tag, 
@@ -284,14 +285,14 @@ const CaptureModal = ({
         <div className="px-5 py-3.5 border-b border-[#D1E8DD] dark:border-[#14382C] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
+              <PenLine className="w-3.5 h-3.5" />
             </div>
             <div>
               <h3 className="text-sm font-black text-[#08241B] dark:text-white tracking-tight font-display">
-                {isManualMode ? "Manual Entry" : "Capture Transaction"}
+                {isManualMode ? "Input Manual" : "Catat Transaksi"}
               </h3>
               <p className="text-[10px] text-[#1C5F4D] dark:text-[#88C8AC]">
-                {isManualMode ? "Fill in details manually" : "Tell SALDO what happened in plain text"}
+                {isManualMode ? "Isi rincian transaksi secara manual" : "Tulis atau ucapkan transaksi santai"}
               </p>
             </div>
           </div>
@@ -302,7 +303,7 @@ const CaptureModal = ({
               className="px-2 py-1 text-[10px] font-bold rounded-lg border border-[#D1E8DD] dark:border-[#14382C] hover:bg-[#E8F5EE] dark:hover:bg-[#08241B] text-[#1C5F4D] dark:text-[#88C8AC] transition-all flex items-center gap-1 cursor-pointer"
             >
               <SlidersHorizontal className="w-2.5 h-2.5" />
-              {isManualMode ? "AI Mode" : "Manual"}
+              {isManualMode ? "Mode Cepat" : "Manual"}
             </button>
             <button
               onClick={onClose}
@@ -440,8 +441,8 @@ const CaptureModal = ({
               {draftResult?.isBoundaryResponse && (
                 <div className="p-3.5 bg-[#F4FAF6] dark:bg-[#08241B]/60 border border-[#D1EADE] dark:border-[#14382C] rounded-2xl text-xs space-y-1.5 animate-fade-in">
                   <div className="flex items-center gap-1.5 text-[#00A86B] font-bold text-[10px] uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>SALDO Assistant</span>
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Pemberitahuan</span>
                   </div>
                   <p className="text-xs text-[#09261E] dark:text-white font-medium leading-relaxed">
                     {draftResult.boundaryMessage}

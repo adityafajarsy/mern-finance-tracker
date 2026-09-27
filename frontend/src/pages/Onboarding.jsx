@@ -8,7 +8,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 
 const ACCOUNT_TYPES = ["Cash", "Bank", "E-Wallet"];
@@ -115,7 +114,7 @@ const Onboarding = () => {
             <span className="w-2.5 h-2.5 rounded-full bg-[#00A86B]" />
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00A86B]/10 text-[#00A86B] text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
+            <CalendarDays className="w-3.5 h-3.5" />
             <span>Setup Awal · Cuma sekali</span>
           </div>
         </div>

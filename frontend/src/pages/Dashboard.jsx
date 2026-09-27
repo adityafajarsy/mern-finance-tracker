@@ -24,7 +24,7 @@ import {
   User,
   ArrowLeftRight,
   X,
-  Sparkles,
+  PenLine,
   ArrowUpRight,
   Mic,
   MicOff
@@ -532,7 +532,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="w-7 h-7 rounded-full bg-[#00A86B]/15 text-[#00A86B] flex items-center justify-center shrink-0">
-              <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#00A86B]" />
+              <PenLine className="w-3.5 h-3.5 text-[#00A86B]" />
             </div>
           )}
 
@@ -578,7 +578,7 @@ const Dashboard = () => {
             type="submit"
             disabled={!floatingInput.trim()}
             className="w-8 h-8 rounded-full bg-[#00A86B] hover:bg-[#00935D] text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-md shadow-[#00A86B]/30 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-            title="Instant AI Capture"
+            title="Catat Transaksi"
           >
             <ArrowUpRight className="w-4 h-4" />
           </button>
