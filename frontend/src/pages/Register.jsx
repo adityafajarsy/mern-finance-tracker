@@ -137,8 +137,8 @@ const Register = () => {
         console.warn("Failed to mark email verified:", err);
       }
 
-      // 4. Instant navigation to Dashboard
-      navigate("/app");
+      // 4. Navigate to onboarding to set cycle start day & initial balances
+      navigate("/onboarding");
     } catch (err) {
       setError(err.message || "Verifikasi atau registrasi gagal. Silakan coba lagi.");
     } finally {

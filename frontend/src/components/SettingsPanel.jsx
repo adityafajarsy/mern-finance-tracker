@@ -22,6 +22,7 @@ const SettingsPanel = ({ accounts = [], onOpenCategoriesModal }) => {
   const [defaultAccount, setDefaultAccount] = useState(user?.defaultAccount?._id || user?.defaultAccount || "");
   const [darkMode, setDarkMode] = useState(user?.darkMode || false);
   const [password, setPassword] = useState("");
+  const [cycleStartDay, setCycleStartDay] = useState(user?.cycleStartDay || 1);
 
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -40,6 +41,7 @@ const SettingsPanel = ({ accounts = [], onOpenCategoriesModal }) => {
         currency,
         darkMode,
         defaultAccount: defaultAccount || null,
+        cycleStartDay,
       };
       if (password) {
         payload.password = password;
@@ -151,6 +153,32 @@ const SettingsPanel = ({ accounts = [], onOpenCategoriesModal }) => {
                   <option key={a._id} value={a._id}>{a.name} ({a.type})</option>
                 ))}
               </select>
+            </div>
+
+            {/* Custom Period Start Day */}
+            <div>
+              <label className="block text-xs font-bold text-[#09261E] dark:text-white mb-1">
+                Tanggal Mulai Periode Bulanan
+              </label>
+              <p className="text-[11px] text-[#1C5F4D] dark:text-[#88C8AC] mb-2">
+                SALDO menghitung income dan pengeluaran dari tanggal ini hingga tanggal yang sama bulan berikutnya. Sesuaikan dengan tanggal gajian atau awal periode finansial kamu.
+              </p>
+              <select
+                value={cycleStartDay}
+                onChange={(e) => setCycleStartDay(Number(e.target.value))}
+                className="w-full p-2.5 bg-white dark:bg-[#09261E] border border-[#D1EADE] dark:border-[#14382C] rounded-lg text-xs font-bold text-[#09261E] dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00A86B] cursor-pointer"
+              >
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                  <option key={d} value={d}>
+                    Tanggal {d}{d === 1 ? " (Awal bulan)" : d === 15 ? " (Pertengahan bulan)" : d === 28 ? " (Aman untuk semua bulan)" : ""}
+                  </option>
+                ))}
+              </select>
+              {cycleStartDay >= 29 && (
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                  Catatan: Bulan yang tidak punya tanggal {cycleStartDay} (misal Februari) akan otomatis disesuaikan ke hari terakhir bulan itu.
+                </p>
+              )}
             </div>
 
             {/* Display Currency */}

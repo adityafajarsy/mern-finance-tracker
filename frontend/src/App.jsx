@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Onboarding from "./pages/Onboarding";
 
 // Root Route Handler: shows LandingPage for guests, redirects to /app for logged-in users
 const RootRoute = () => {
@@ -29,7 +30,17 @@ function App() {
           <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
+          {/* Onboarding: protected but separate from main app */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/app"
             element={
@@ -38,7 +49,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
           {/* Catchall redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

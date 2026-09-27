@@ -35,6 +35,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    cycleStartDay: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 31,
+    },
   },
   {
     timestamps: true,

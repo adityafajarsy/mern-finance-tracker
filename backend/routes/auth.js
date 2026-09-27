@@ -68,6 +68,7 @@ router.post("/register", async (req, res) => {
         email: user.email,
         currency: user.currency,
         darkMode: user.darkMode,
+        cycleStartDay: user.cycleStartDay,
         token: generateToken(user._id),
       });
     } else {
@@ -94,6 +95,7 @@ router.post("/login", async (req, res) => {
         email: user.email,
         currency: user.currency,
         darkMode: user.darkMode,
+        cycleStartDay: user.cycleStartDay,
         token: generateToken(user._id),
       });
     } else {
@@ -142,6 +144,13 @@ router.put("/profile", protect, async (req, res) => {
         user.defaultAccount = req.body.defaultAccount || null;
       }
 
+      if (req.body.cycleStartDay !== undefined) {
+        const day = parseInt(req.body.cycleStartDay);
+        if (!isNaN(day) && day >= 1 && day <= 31) {
+          user.cycleStartDay = day;
+        }
+      }
+
       if (req.body.password) {
         user.password = req.body.password;
       }
@@ -159,6 +168,7 @@ router.put("/profile", protect, async (req, res) => {
         currency: populatedUser.currency,
         darkMode: populatedUser.darkMode,
         defaultAccount: populatedUser.defaultAccount,
+        cycleStartDay: populatedUser.cycleStartDay,
         token: generateToken(populatedUser._id),
       });
     } else {

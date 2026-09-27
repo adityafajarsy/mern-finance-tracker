@@ -105,6 +105,8 @@ export const AuthProvider = ({ children }) => {
         email: data.email,
         currency: data.currency,
         darkMode: data.darkMode,
+        cycleStartDay: data.cycleStartDay ?? 1,
+        defaultAccount: data.defaultAccount,
       });
       return data;
     } finally {
@@ -130,6 +132,8 @@ export const AuthProvider = ({ children }) => {
         email: data.email,
         currency: data.currency,
         darkMode: data.darkMode,
+        cycleStartDay: data.cycleStartDay ?? 1,
+        defaultAccount: data.defaultAccount,
       });
       return data;
     } finally {
@@ -157,6 +161,8 @@ export const AuthProvider = ({ children }) => {
         email: data.email,
         currency: data.currency,
         darkMode: data.darkMode,
+        cycleStartDay: data.cycleStartDay ?? 1,
+        defaultAccount: data.defaultAccount,
       });
 
       if (data.token) {

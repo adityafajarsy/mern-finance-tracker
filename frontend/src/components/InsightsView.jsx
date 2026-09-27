@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 
 const InsightsView = ({ authFetch }) => {
-  const [targetYear, setTargetYear] = useState(new Date().getFullYear());
-  const [targetMonth, setTargetMonth] = useState(new Date().getMonth() + 1);
+  const [periodOffset, setPeriodOffset] = useState(0); // 0 = current, 1 = prev, etc.
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,17 +25,24 @@ const InsightsView = ({ authFetch }) => {
     setLoading(true);
     setError("");
     try {
-      const res = await authFetch(`/api/stats/insights?year=${targetYear}&month=${targetMonth}`);
+      const res = await authFetch(`/api/stats/insights?periodOffset=${periodOffset}`);
       if (!res.ok) {
         throw new Error("Failed to load insights data");
       }
       const data = await res.json();
       setInsights(data);
 
-      // Auto-select today if current month or select the latest active day
-      const now = new Date();
-      if (targetYear === now.getFullYear() && targetMonth === (now.getMonth() + 1)) {
-        setSelectedDay(now.getDate());
+      // Auto-select today if current period, otherwise select last active day
+      if (periodOffset === 0) {
+        // Find today's entry in dailyReport
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        const todayEntry = data.dailyReport?.find(d => d.date === todayStr);
+        if (todayEntry) {
+          setSelectedDay(todayEntry.day);
+        } else {
+          setSelectedDay(1);
+        }
       } else {
         const lastActive = data.dailyReport?.filter(d => d.transactionCount > 0).pop();
         setSelectedDay(lastActive ? lastActive.day : 1);
@@ -51,25 +57,10 @@ const InsightsView = ({ authFetch }) => {
 
   useEffect(() => {
     fetchInsights();
-  }, [targetYear, targetMonth]);
+  }, [periodOffset]);
 
-  const handlePrevMonth = () => {
-    if (targetMonth === 1) {
-      setTargetMonth(12);
-      setTargetYear(targetYear - 1);
-    } else {
-      setTargetMonth(targetMonth - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (targetMonth === 12) {
-      setTargetMonth(1);
-      setTargetYear(targetYear + 1);
-    } else {
-      setTargetMonth(targetMonth + 1);
-    }
-  };
+  const handlePrevPeriod = () => setPeriodOffset((prev) => prev + 1);
+  const handleNextPeriod = () => setPeriodOffset((prev) => Math.max(0, prev - 1));
 
   const formatCurrency = (amount) => {
     const formatted = Math.abs(amount || 0).toLocaleString("id-ID");
@@ -91,7 +82,8 @@ const InsightsView = ({ authFetch }) => {
   const forecast = insights?.forecast;
   const recommendations = insights?.recommendations || [];
 
-  const monthLabel = new Date(targetYear, targetMonth - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  // Period label from backend (e.g. "26 Sep 2026 - 25 Okt 2026")
+  const periodLabel = insights?.periodLabel || "";
   const selectedDayData = dailyReport.find(d => d.day === selectedDay) || dailyReport[0] || null;
 
   // Maximum spend/income value for relative bar chart heights
@@ -103,7 +95,7 @@ const InsightsView = ({ authFetch }) => {
   return (
     <div className="space-y-12 animate-fade-in pb-4 font-sans max-w-3xl">
       
-      {/* Header & Month Navigator */}
+      {/* Header & Period Navigator */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#D1EADE]/70 dark:border-[#14382C] pb-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#09261E] dark:text-white tracking-tight font-display">
@@ -114,24 +106,25 @@ const InsightsView = ({ authFetch }) => {
           </p>
         </div>
 
-        {/* Month Selector Controls */}
+        {/* Period Selector Controls */}
         <div className="flex items-center gap-1.5 bg-white dark:bg-[#09261E] p-1 rounded-lg border border-[#D1EADE] dark:border-[#14382C]">
           <button
-            onClick={handlePrevMonth}
+            onClick={handlePrevPeriod}
             className="p-1 rounded text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-[#F4FAF6] dark:hover:bg-[#071913] cursor-pointer"
-            title="Previous Month"
+            title="Previous Period"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           
-          <span className="text-xs font-bold text-[#09261E] dark:text-white px-2 min-w-[110px] text-center">
-            {monthLabel}
+          <span className="text-xs font-bold text-[#09261E] dark:text-white px-2 min-w-[160px] text-center">
+            {periodLabel || "Memuat..."}
           </span>
 
           <button
-            onClick={handleNextMonth}
-            className="p-1 rounded text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-[#F4FAF6] dark:hover:bg-[#071913] cursor-pointer"
-            title="Next Month"
+            onClick={handleNextPeriod}
+            disabled={periodOffset === 0}
+            className="p-1 rounded text-[#1C5F4D] dark:text-[#88C8AC] hover:bg-[#F4FAF6] dark:hover:bg-[#071913] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Next Period"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -139,16 +132,16 @@ const InsightsView = ({ authFetch }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 01 - MONTH OVERVIEW                                                       */}
+      {/* 01 - PERIOD OVERVIEW                                                      */}
       {/* ========================================================================= */}
       <section className="space-y-4">
         <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#1C5F4D] dark:text-[#88C8AC]">
-          01 · Month Overview
+          01 · Period Overview
         </p>
 
         <div className="space-y-2">
           <h3 className="text-2xl sm:text-3xl font-black font-display tracking-tight text-[#09261E] dark:text-white">
-            You saved <span className="text-[#00A86B]">{whatHappened.savingsRate}%</span> of your income in {monthLabel.split(" ")[0]}.
+            You saved <span className="text-[#00A86B]">{whatHappened.savingsRate}%</span> of your income this period.
           </h3>
           <p className="text-3xl sm:text-4xl font-black font-display text-[#00A86B] tabular-nums">
             {formatCurrency(whatHappened.netSavings)}
@@ -220,14 +213,14 @@ const InsightsView = ({ authFetch }) => {
             </h3>
           </div>
           <span className="text-[10px] font-bold text-[#1C5F4D] dark:text-[#88C8AC] uppercase">
-            {dailyReport.length} Days · {monthLabel}
+            {dailyReport.length} Days
           </span>
         </div>
 
         {/* Interactive Daily Timeline Chart Strip */}
         <div className="bg-white/80 dark:bg-[#09261E]/80 border border-[#D1EADE] dark:border-[#14382C] rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
           
-          {/* Bar Visualization for Every Day in the Month */}
+          {/* Bar Visualization for Every Day in the Period */}
           <div className="h-32 flex items-end gap-1 sm:gap-1.5 overflow-x-auto pb-2 pt-4 px-1 select-none">
             {dailyReport.map((dayItem) => {
               const isSelected = selectedDay === dayItem.day;
@@ -279,21 +272,21 @@ const InsightsView = ({ authFetch }) => {
                         : "text-zinc-400 dark:text-zinc-600"
                     }`}
                   >
-                    {String(dayItem.day).padStart(2, "0")}
+                    {dayItem.label.split(" ")[0]}
                   </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Selected Day Inspection Card (Clean & Editorial) */}
+          {/* Selected Day Inspection Card */}
           {selectedDayData && (
             <div className="pt-3 border-t border-[#D1EADE]/60 dark:border-[#14382C] animate-fade-in space-y-3">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#00A86B]" />
                   <h4 className="text-sm font-black font-display text-[#09261E] dark:text-white uppercase tracking-wider">
-                    {selectedDayData.label} {targetYear}
+                    {selectedDayData.label}
                   </h4>
                   <span className="text-xs text-[#1C5F4D] dark:text-[#88C8AC] font-medium">
                     · {selectedDayData.transactionCount} {selectedDayData.transactionCount === 1 ? "transaction" : "transactions"}
@@ -376,7 +369,7 @@ const InsightsView = ({ authFetch }) => {
         </p>
 
         <p className="text-xs text-[#1C5F4D] dark:text-[#88C8AC]">
-          6-month historical cashflow trajectory
+          6-period historical cashflow trajectory
         </p>
 
         {/* Historical Chart */}
@@ -434,13 +427,13 @@ const InsightsView = ({ authFetch }) => {
               Deterministic Forecast
             </span>
             <p className="text-xs text-[#88C8AC]">
-              At your current daily burn rate of <strong className="text-white font-mono">{formatCurrency(forecast.dailyBurnRate)}/day</strong>, you may end the month around:
+              At your current daily burn rate of <strong className="text-white font-mono">{formatCurrency(forecast.dailyBurnRate)}/day</strong>, you may end the period around:
             </p>
             <h4 className="text-3xl font-black font-display text-white tabular-nums">
               {formatCurrency(forecast.estimatedEndOfMonthBalance)}
             </h4>
             <p className="text-[10px] text-[#88C8AC] pt-1">
-              Projected month total spend: {formatCurrency(forecast.projectedMonthEndExpense)} ({forecast.daysRemaining} days remaining)
+              Projected period total spend: {formatCurrency(forecast.projectedMonthEndExpense)} ({forecast.daysRemaining} days remaining)
             </p>
           </div>
         </section>

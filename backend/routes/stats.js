@@ -7,16 +7,16 @@ import Transaction from "../models/Transaction.js";
 const router = express.Router();
 
 // @desc    Get unified Insights dataset (What Happened, Comparisons, Forecast, Recommendations)
-// @route   GET /api/stats/insights
+// @route   GET /api/stats/insights?periodOffset=0
 // @access  Private
 router.get("/insights", protect, async (req, res) => {
-  const { year, month } = req.query;
+  const { periodOffset } = req.query;
 
   try {
     const data = await getInsightsData({
       userId: req.user._id,
-      year,
-      month,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: periodOffset || 0,
     });
 
     res.json(data);
@@ -25,7 +25,7 @@ router.get("/insights", protect, async (req, res) => {
   }
 });
 
-// @desc    Get dashboard summary (Total balance, monthly income/expense, recent txs)
+// @desc    Get dashboard summary (Total balance, current period income/expense, recent txs)
 // @route   GET /api/stats/summary
 // @access  Private
 router.get("/summary", protect, async (req, res) => {
@@ -36,11 +36,10 @@ router.get("/summary", protect, async (req, res) => {
     const accounts = await Account.find({ createdBy: userId });
     const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
-    const now = new Date();
     const insights = await getInsightsData({
       userId,
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: 0,
     });
 
     // Recent 5 transactions
@@ -60,9 +59,10 @@ router.get("/summary", protect, async (req, res) => {
         netSavings: insights.whatHappened.netSavings,
       },
       prevMonth: {
-        income: insights.comparison.prevMonth.income,
-        expense: insights.comparison.prevMonth.expense,
+        income: insights.comparison.prevPeriod.income,
+        expense: insights.comparison.prevPeriod.expense,
       },
+      periodLabel: insights.periodLabel,
       forecast: insights.forecast,
       recommendation: insights.recommendations[0] || null,
       recentTransactions,
@@ -72,12 +72,16 @@ router.get("/summary", protect, async (req, res) => {
   }
 });
 
-// @desc    Get monthly trends for charts (Past 6 months)
+// @desc    Get period trends for charts (Past 6 periods)
 // @route   GET /api/stats/monthly-trends
 // @access  Private
 router.get("/monthly-trends", protect, async (req, res) => {
   try {
-    const insights = await getInsightsData({ userId: req.user._id });
+    const insights = await getInsightsData({
+      userId: req.user._id,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: 0,
+    });
     res.json(insights.comparison.historicalTrends);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,7 +93,11 @@ router.get("/monthly-trends", protect, async (req, res) => {
 // @access  Private
 router.get("/category-breakdown", protect, async (req, res) => {
   try {
-    const insights = await getInsightsData({ userId: req.user._id });
+    const insights = await getInsightsData({
+      userId: req.user._id,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: 0,
+    });
     res.json({
       totalExpense: insights.whatHappened.expense,
       breakdown: insights.whatHappened.categoryBreakdown,
@@ -99,24 +107,21 @@ router.get("/category-breakdown", protect, async (req, res) => {
   }
 });
 
-// @desc    Get monthly report (backward compatible)
-// @route   GET /api/stats/monthly-report
+// @desc    Get period report
+// @route   GET /api/stats/monthly-report?periodOffset=0
 // @access  Private
 router.get("/monthly-report", protect, async (req, res) => {
-  const { year, month } = req.query;
+  const { periodOffset } = req.query;
   try {
     const insights = await getInsightsData({
       userId: req.user._id,
-      year,
-      month,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: periodOffset || 0,
     });
-
-    const startOfMonth = new Date(insights.year, insights.month - 1, 1);
-    const endOfMonth = new Date(insights.year, insights.month, 0, 23, 59, 59, 999);
 
     const transactions = await Transaction.find({
       createdBy: req.user._id,
-      date: { $gte: startOfMonth, $lte: endOfMonth },
+      date: { $gte: new Date(insights.periodStart), $lte: new Date(insights.periodEnd) },
     })
       .populate("category", "name icon color type")
       .populate("account", "name type color")
@@ -124,9 +129,9 @@ router.get("/monthly-report", protect, async (req, res) => {
       .sort({ date: -1, createdAt: -1 });
 
     res.json({
-      monthLabel: insights.monthLabel,
-      year: insights.year,
-      month: insights.month,
+      periodLabel: insights.periodLabel,
+      periodStart: insights.periodStart,
+      periodEnd: insights.periodEnd,
       openingBalance: insights.totalWealth - insights.whatHappened.netSavings,
       totalIncome: insights.whatHappened.income,
       totalExpenses: insights.whatHappened.expense,
@@ -139,22 +144,22 @@ router.get("/monthly-report", protect, async (req, res) => {
   }
 });
 
-// @desc    Get daily financial report timeline for a month
-// @route   GET /api/stats/daily-report
+// @desc    Get daily financial report timeline for a period
+// @route   GET /api/stats/daily-report?periodOffset=0
 // @access  Private
 router.get("/daily-report", protect, async (req, res) => {
-  const { year, month } = req.query;
+  const { periodOffset } = req.query;
   try {
     const insights = await getInsightsData({
       userId: req.user._id,
-      year,
-      month,
+      cycleStartDay: req.user.cycleStartDay || 1,
+      periodOffset: periodOffset || 0,
     });
 
     res.json({
-      year: insights.year,
-      month: insights.month,
-      monthLabel: insights.monthLabel,
+      periodLabel: insights.periodLabel,
+      periodStart: insights.periodStart,
+      periodEnd: insights.periodEnd,
       dailyReport: insights.dailyReport,
       summary: {
         totalIncome: insights.whatHappened.income,

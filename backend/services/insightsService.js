@@ -3,50 +3,126 @@ import Account from "../models/Account.js";
 import Category from "../models/Category.js";
 
 /**
+ * Returns the start and end Date of the financial cycle period that contains
+ * the given referenceDate, based on the user's cycleStartDay.
+ *
+ * Example: cycleStartDay=26, referenceDate=2026-10-05
+ *   -> periodStart = 2026-09-26, periodEnd = 2026-10-25 23:59:59.999
+ *
+ * Edge-case: cycleStartDay=31 and month has only 28 days -> clamp to last day of that month.
+ */
+const clampDay = (year, month, day) => {
+  const lastDay = new Date(year, month, 0).getDate(); // last day of that month (month is 1-indexed here)
+  return Math.min(day, lastDay);
+};
+
+export const getCyclePeriod = (cycleStartDay, referenceDate = new Date()) => {
+  const d = cycleStartDay || 1;
+  const ref = new Date(referenceDate);
+  const refYear = ref.getFullYear();
+  const refMonth = ref.getMonth() + 1; // 1-indexed
+  const refDay = ref.getDate();
+
+  let periodStartYear, periodStartMonth;
+
+  // If today >= cycleStartDay: period started this month
+  // If today < cycleStartDay: period started previous month
+  if (refDay >= d) {
+    periodStartYear = refYear;
+    periodStartMonth = refMonth;
+  } else {
+    // previous month
+    if (refMonth === 1) {
+      periodStartYear = refYear - 1;
+      periodStartMonth = 12;
+    } else {
+      periodStartYear = refYear;
+      periodStartMonth = refMonth - 1;
+    }
+  }
+
+  const startDay = clampDay(periodStartYear, periodStartMonth, d);
+  const periodStart = new Date(periodStartYear, periodStartMonth - 1, startDay, 0, 0, 0, 0);
+
+  // Period ends one day before cycleStartDay of the following month
+  let periodEndYear, periodEndMonth;
+  if (periodStartMonth === 12) {
+    periodEndYear = periodStartYear + 1;
+    periodEndMonth = 1;
+  } else {
+    periodEndYear = periodStartYear;
+    periodEndMonth = periodStartMonth + 1;
+  }
+  const endDay = clampDay(periodEndYear, periodEndMonth, d) - 1;
+  // If endDay becomes 0, it means cycleStartDay is 1 – end is last day of periodStartMonth
+  const periodEnd =
+    endDay < 1
+      ? new Date(periodEndYear, periodEndMonth - 1, 0, 23, 59, 59, 999)
+      : new Date(periodEndYear, periodEndMonth - 1, endDay, 23, 59, 59, 999);
+
+  return { periodStart, periodEnd };
+};
+
+/**
+ * Resolve the Nth previous cycle period relative to the current one.
+ * offset=0 -> current period, offset=1 -> one period back, etc.
+ */
+export const getCyclePeriodByOffset = (cycleStartDay, offset = 0) => {
+  const now = new Date();
+  const current = getCyclePeriod(cycleStartDay, now);
+
+  if (offset === 0) return current;
+
+  // Step back by subtracting one month from periodStart for each offset step
+  let ref = new Date(current.periodStart);
+  for (let i = 0; i < offset; i++) {
+    // Move ref back by 1 month to land inside the previous period
+    ref = new Date(ref.getFullYear(), ref.getMonth() - 1, ref.getDate());
+  }
+  return getCyclePeriod(cycleStartDay, ref);
+};
+
+/**
  * Insights Service
  * Computes deterministic financial metrics, spending velocity, forecasts, and evidence-based recommendations.
+ * All periods are now based on the user's custom cycleStartDay instead of calendar month boundaries.
  */
-export const getInsightsData = async ({ userId, year, month }) => {
+export const getInsightsData = async ({ userId, cycleStartDay = 1, periodOffset = 0 }) => {
   const now = new Date();
-  const targetYear = year ? parseInt(year) : now.getFullYear();
-  const targetMonth = month ? parseInt(month) : now.getMonth() + 1; // 1-indexed
+  const safeDay = Math.max(1, Math.min(31, parseInt(cycleStartDay) || 1));
 
-  const startOfMonth = new Date(targetYear, targetMonth - 1, 1);
-  const endOfMonth = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999);
-  const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+  // Resolve the target period (current or offset-N periods back)
+  const { periodStart, periodEnd } = getCyclePeriodByOffset(safeDay, parseInt(periodOffset) || 0);
+  const { periodStart: prevPeriodStart, periodEnd: prevPeriodEnd } = getCyclePeriodByOffset(safeDay, (parseInt(periodOffset) || 0) + 1);
 
   // 1. Current overall wealth
   const accounts = await Account.find({ createdBy: userId });
   const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
-  // 2. Previous Month Dates for Comparison
-  const prevMonthStart = new Date(targetYear, targetMonth - 2, 1);
-  const prevMonthEnd = new Date(targetYear, targetMonth - 1, 0, 23, 59, 59, 999);
-
-  // Current Month Aggregates
-  const currentMonthTx = await Transaction.find({
+  // 2. Current Period Aggregates
+  const currentPeriodTx = await Transaction.find({
     createdBy: userId,
-    date: { $gte: startOfMonth, $lte: endOfMonth },
+    date: { $gte: periodStart, $lte: periodEnd },
   }).populate("category", "name icon color type");
 
   let currentIncome = 0;
   let currentExpense = 0;
-  currentMonthTx.forEach(tx => {
+  currentPeriodTx.forEach(tx => {
     if (tx.type === "Income") currentIncome += tx.amount;
     if (tx.type === "Expense") currentExpense += tx.amount;
   });
   const currentSavings = currentIncome - currentExpense;
   const currentSavingsRate = currentIncome > 0 ? Math.round((currentSavings / currentIncome) * 100) : 0;
 
-  // Previous Month Aggregates
-  const prevMonthTx = await Transaction.find({
+  // 3. Previous Period Aggregates
+  const prevPeriodTx = await Transaction.find({
     createdBy: userId,
-    date: { $gte: prevMonthStart, $lte: prevMonthEnd },
+    date: { $gte: prevPeriodStart, $lte: prevPeriodEnd },
   });
 
   let prevIncome = 0;
   let prevExpense = 0;
-  prevMonthTx.forEach(tx => {
+  prevPeriodTx.forEach(tx => {
     if (tx.type === "Income") prevIncome += tx.amount;
     if (tx.type === "Expense") prevExpense += tx.amount;
   });
@@ -57,9 +133,9 @@ export const getInsightsData = async ({ userId, year, month }) => {
     return Math.round(((curr - prev) / Math.abs(prev)) * 100);
   };
 
-  // Category Breakdown for Target Month
+  // 4. Category Breakdown for Target Period
   const categoryStatsMap = {};
-  currentMonthTx.forEach(tx => {
+  currentPeriodTx.forEach(tx => {
     if (tx.type === "Expense") {
       const catName = tx.category?.name || "Uncategorized";
       const catColor = tx.category?.color || "#9CA3AF";
@@ -86,16 +162,22 @@ export const getInsightsData = async ({ userId, year, month }) => {
     }))
     .sort((a, b) => b.total - a.total);
 
-  // Daily Financial Report (Timeline for all days 1..daysInMonth)
+  // 5. Daily Financial Report (for every day in the period, from periodStart to periodEnd)
   const dailyReport = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayStr = String(day).padStart(2, "0");
-    const dateKey = `${targetYear}-${String(targetMonth).padStart(2, "0")}-${dayStr}`;
-    const dateObj = new Date(targetYear, targetMonth - 1, day);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const totalDays = Math.floor((periodEnd.getTime() - periodStart.getTime()) / msPerDay) + 1;
+
+  for (let i = 0; i < totalDays; i++) {
+    const dateObj = new Date(periodStart.getTime() + i * msPerDay);
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth() + 1;
+    const day = dateObj.getDate();
+    const dateKey = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const dayLabel = dateObj.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
 
     dailyReport.push({
-      day,
+      day: i + 1, // sequential day index within the period (1-based)
+      calendarDay: day,
       date: dateKey,
       label: dayLabel,
       income: 0,
@@ -106,67 +188,58 @@ export const getInsightsData = async ({ userId, year, month }) => {
     });
   }
 
-  currentMonthTx.forEach(tx => {
-    const txDateStr = tx.date instanceof Date ? tx.date.toISOString().split("T")[0] : String(tx.date).split("T")[0];
-    const [txY, txM, txD] = txDateStr.split("-").map(Number);
+  currentPeriodTx.forEach(tx => {
+    const txDate = tx.date instanceof Date ? tx.date : new Date(tx.date);
+    const txDateStr = txDate.toISOString().split("T")[0];
+    const idx = dailyReport.findIndex(d => d.date === txDateStr);
+    if (idx === -1) return;
 
-    if (txY === targetYear && txM === targetMonth && txD >= 1 && txD <= daysInMonth) {
-      const dayEntry = dailyReport[txD - 1];
-
-      if (tx.type === "Income") {
-        dayEntry.income += tx.amount;
-        dayEntry.transactionCount += 1;
-        dayEntry.transactions.push({
-          _id: tx._id,
-          type: tx.type,
-          amount: tx.amount,
-          description: tx.description,
-          category: tx.category?.name || "Income",
-          color: tx.category?.color || "#00A86B",
-          account: tx.account?.name || "Account",
-          date: tx.date,
-        });
-      } else if (tx.type === "Expense") {
-        dayEntry.expense += tx.amount;
-        dayEntry.transactionCount += 1;
-        dayEntry.transactions.push({
-          _id: tx._id,
-          type: tx.type,
-          amount: tx.amount,
-          description: tx.description,
-          category: tx.category?.name || "Uncategorized",
-          color: tx.category?.color || "#9CA3AF",
-          account: tx.account?.name || "Account",
-          date: tx.date,
-        });
-      } else if (tx.type === "Transfer") {
-        dayEntry.transactionCount += 1;
-        dayEntry.transactions.push({
-          _id: tx._id,
-          type: tx.type,
-          amount: tx.amount,
-          description: tx.description || "Transfer Antar-Akun",
-          sourceAccount: tx.account?.name,
-          destinationAccount: tx.destinationAccount?.name,
-          date: tx.date,
-        });
-      }
-
-      dayEntry.netCashflow = dayEntry.income - dayEntry.expense;
+    const dayEntry = dailyReport[idx];
+    if (tx.type === "Income") {
+      dayEntry.income += tx.amount;
+      dayEntry.transactionCount += 1;
+      dayEntry.transactions.push({
+        _id: tx._id,
+        type: tx.type,
+        amount: tx.amount,
+        description: tx.description,
+        category: tx.category?.name || "Income",
+        color: tx.category?.color || "#00A86B",
+        account: tx.account?.name || "Account",
+        date: tx.date,
+      });
+    } else if (tx.type === "Expense") {
+      dayEntry.expense += tx.amount;
+      dayEntry.transactionCount += 1;
+      dayEntry.transactions.push({
+        _id: tx._id,
+        type: tx.type,
+        amount: tx.amount,
+        description: tx.description,
+        category: tx.category?.name || "Uncategorized",
+        color: tx.category?.color || "#9CA3AF",
+        account: tx.account?.name || "Account",
+        date: tx.date,
+      });
+    } else if (tx.type === "Transfer") {
+      dayEntry.transactionCount += 1;
+      dayEntry.transactions.push({
+        _id: tx._id,
+        type: tx.type,
+        amount: tx.amount,
+        description: tx.description || "Transfer Antar-Akun",
+        sourceAccount: tx.account?.name,
+        destinationAccount: tx.destinationAccount?.name,
+        date: tx.date,
+      });
     }
+    dayEntry.netCashflow = dayEntry.income - dayEntry.expense;
   });
 
-  // 6-Month Historical Trends
+  // 6. 6-Period Historical Trends
   const historicalTrends = [];
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
   for (let i = 5; i >= 0; i--) {
-    const tDate = new Date(targetYear, targetMonth - 1 - i, 1);
-    const tYear = tDate.getFullYear();
-    const tMonth = tDate.getMonth() + 1;
-    const tStart = new Date(tYear, tMonth - 1, 1);
-    const tEnd = new Date(tYear, tMonth, 0, 23, 59, 59, 999);
-
+    const { periodStart: tStart, periodEnd: tEnd } = getCyclePeriodByOffset(safeDay, (parseInt(periodOffset) || 0) + i);
     const mTx = await Transaction.find({
       createdBy: userId,
       date: { $gte: tStart, $lte: tEnd },
@@ -179,32 +252,38 @@ export const getInsightsData = async ({ userId, year, month }) => {
       if (t.type === "Expense") mExpense += t.amount;
     });
 
+    // Label: show start date of the period
+    const startLabel = tStart.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    const endLabel = tEnd.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+
     historicalTrends.push({
-      label: `${monthNames[tDate.getMonth()]} ${tYear}`,
-      month: tMonth,
-      year: tYear,
+      label: `${startLabel}`,
+      fullLabel: `${startLabel} - ${endLabel}`,
       income: mIncome,
       expense: mExpense,
       savings: mIncome - mExpense,
     });
   }
 
-  // Deterministic Forecast
-  const isCurrentActiveMonth = targetYear === now.getFullYear() && targetMonth === (now.getMonth() + 1);
-  const currentDay = isCurrentActiveMonth ? now.getDate() : daysInMonth;
-  const daysElapsed = Math.max(1, currentDay);
-  const daysRemaining = Math.max(0, daysInMonth - currentDay);
+  // 7. Deterministic Forecast
+  const isCurrentActivePeriod = periodOffset === 0 || parseInt(periodOffset) === 0;
+  const isCurrentActiveAndOngoing = isCurrentActivePeriod && now >= periodStart && now <= periodEnd;
+  const daysInPeriod = totalDays;
+  const daysElapsed = isCurrentActiveAndOngoing
+    ? Math.max(1, Math.floor((now.getTime() - periodStart.getTime()) / msPerDay) + 1)
+    : daysInPeriod;
+  const daysRemaining = Math.max(0, daysInPeriod - daysElapsed);
 
   const dailyBurnRate = Math.round(currentExpense / daysElapsed);
-  const projectedMonthEndExpense = isCurrentActiveMonth ? Math.round(dailyBurnRate * daysInMonth) : currentExpense;
-  const remainingProjectedSpend = isCurrentActiveMonth ? Math.max(0, projectedMonthEndExpense - currentExpense) : 0;
+  const projectedPeriodEndExpense = isCurrentActiveAndOngoing ? Math.round(dailyBurnRate * daysInPeriod) : currentExpense;
+  const remainingProjectedSpend = isCurrentActiveAndOngoing ? Math.max(0, projectedPeriodEndExpense - currentExpense) : 0;
   const estimatedEndOfMonthBalance = Math.max(0, totalBalance - remainingProjectedSpend);
 
-  // Contextual Recommendations (Focusing exclusively on discretionary spending)
+  // 8. Contextual Recommendations
   const flexibleCategories = ["Food & Drinks", "Entertainment", "Shopping", "Personal", "Other", "Groceries"];
   const recommendations = [];
 
-  const highSpendCategory = categoryBreakdown.find(c => 
+  const highSpendCategory = categoryBreakdown.find(c =>
     flexibleCategories.some(f => c.name.toLowerCase().includes(f.toLowerCase())) && c.percentage >= 25 && c.total >= 50000
   );
 
@@ -215,7 +294,7 @@ export const getInsightsData = async ({ userId, year, month }) => {
       type: "opportunity",
       category: highSpendCategory.name,
       title: `Optimasi Pengeluaran ${highSpendCategory.name}`,
-      message: `Kategori ${highSpendCategory.name} menyumbang ${highSpendCategory.percentage}% dari total belanjaan bulan ini (Rp ${highSpendCategory.total.toLocaleString("id-ID")}). Mengurangi sekitar Rp ${potentialSaving.toLocaleString("id-ID")} dapat meningkatkan sisa tabungan kamu.`,
+      message: `Kategori ${highSpendCategory.name} menyumbang ${highSpendCategory.percentage}% dari total belanjaan periode ini (Rp ${highSpendCategory.total.toLocaleString("id-ID")}). Mengurangi sekitar Rp ${potentialSaving.toLocaleString("id-ID")} dapat meningkatkan sisa tabungan kamu.`,
       potentialSaving,
     });
   }
@@ -225,7 +304,7 @@ export const getInsightsData = async ({ userId, year, month }) => {
       id: "savings-rate-boost",
       type: "tip",
       title: "Tingkatkan Rasio Tabungan",
-      message: `Tingkat tabungan bulan ini berada di angka ${currentSavingsRate}%. Menjaga pengeluaran harian di bawah Rp ${Math.round((currentIncome * 0.7) / daysInMonth).toLocaleString("id-ID")}/hari dapat membantu mencapai target tabungan sehat 30%.`,
+      message: `Tingkat tabungan periode ini berada di angka ${currentSavingsRate}%. Menjaga pengeluaran harian di bawah Rp ${Math.round((currentIncome * 0.7) / daysInPeriod).toLocaleString("id-ID")}/hari dapat membantu mencapai target tabungan sehat 30%.`,
     });
   }
 
@@ -234,14 +313,18 @@ export const getInsightsData = async ({ userId, year, month }) => {
       id: "healthy-cashflow",
       type: "success",
       title: "Arus Kas Terkelola Sehat",
-      message: "Pola pengeluaran dan tabungan kamu bulan ini dalam kondisi seimbang dan terkontrol dengan baik.",
+      message: "Pola pengeluaran dan tabungan kamu periode ini dalam kondisi seimbang dan terkontrol dengan baik.",
     });
   }
 
+  // Build human-readable period label
+  const periodLabel = `${periodStart.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} - ${periodEnd.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}`;
+
   return {
-    monthLabel: startOfMonth.toLocaleString("id-ID", { month: "long" }),
-    year: targetYear,
-    month: targetMonth,
+    periodLabel,
+    periodStart: periodStart.toISOString(),
+    periodEnd: periodEnd.toISOString(),
+    cycleStartDay: safeDay,
     totalWealth: totalBalance,
     whatHappened: {
       income: currentIncome,
@@ -255,7 +338,7 @@ export const getInsightsData = async ({ userId, year, month }) => {
       incomeShift: calcPercentageShift(currentIncome, prevIncome),
       expenseShift: calcPercentageShift(currentExpense, prevExpense),
       savingsShift: calcPercentageShift(currentSavings, prevSavings),
-      prevMonth: {
+      prevPeriod: {
         income: prevIncome,
         expense: prevExpense,
         savings: prevSavings,
@@ -264,12 +347,12 @@ export const getInsightsData = async ({ userId, year, month }) => {
     },
     forecast: {
       dailyBurnRate,
-      projectedMonthEndExpense,
+      projectedMonthEndExpense: projectedPeriodEndExpense,
       daysElapsed,
       daysRemaining,
-      daysInMonth,
+      daysInMonth: daysInPeriod,
       estimatedEndOfMonthBalance,
-      isCurrentActiveMonth,
+      isCurrentActiveMonth: isCurrentActiveAndOngoing,
     },
     recommendations,
   };
